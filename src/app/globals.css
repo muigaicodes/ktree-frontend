@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+:root {
+  --kt-green: #0B4A24;
+  --kt-green-soft: #E3F5EC;
+  --kt-green-soft2: #F3FBF7;
+  --kt-dark: #071822;
+  --kt-text: #1C2833;
+  --kt-muted: #6B7B8A;
+  --kt-border: #E1E6EC;
+  --kt-bg: #FFF;
+  --kt-radius-lg: 18px;
+  --kt-radius-xl: 24px;
+  --kt-shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.06);
+  --kt-shadow-card: 0 18px 46px rgba(8, 51, 26, 0.12);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+  background: var(--kt-bg);
+  color: var(--kt-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
