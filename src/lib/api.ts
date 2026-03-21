@@ -1,17 +1,12 @@
 /**
- * API helpers — placeholder functions for the CTO to connect to the real backend.
- *
- * Current backend:
- *   - Webhook: https://n8n.srv1196471.hstgr.cloud/webhook/knowledgtree (main form)
- *   - Webhook: https://n8n.srv1196471.hstgr.cloud/webhook/43e0fd4c-... (waitlist notify)
- *   - WhatsApp redirect: https://wa.me/250791276393
- *
- * TODO (CTO): Replace these with real API calls to your pipeline backend.
+ * API helpers — wired to the live ktree backend at Render.
  */
 
-const WEBHOOK_MAIN = "https://n8n.srv1196471.hstgr.cloud/webhook/knowledgtree";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ktree-api.onrender.com";
 const WEBHOOK_NOTIFY = "https://n8n.srv1196471.hstgr.cloud/webhook/43e0fd4c-4b42-4464-a9e0-42ee50d3cdf0";
 const WHATSAPP_LINK = "https://wa.me/250791276393";
+
+/* ── Types ── */
 
 export interface SignupPayload {
   fullName: string;
@@ -34,16 +29,80 @@ export interface ExtractPayload {
   youtubeUrl: string;
 }
 
+export interface Spine {
+  title: string;
+  theme: string;
+  insightIds: string[];
+}
+
+export interface Insight {
+  id: string;
+  text: string;
+  depth: number;
+}
+
+export interface Quote {
+  text: string;
+  speaker: string;
+}
+
+export interface PipelineResult {
+  spines: Spine[];
+  insights: Insight[];
+  quotes: Quote[];
+}
+
+export interface JourneyMessage {
+  day: number;
+  sequence: number;
+  formatted: string;
+}
+
+/* ── Pipeline API ── */
+
+/** Run the full pipeline: transcript → insights → quotes → arc spines */
+export async function generateArcs(videoUrl: string): Promise<PipelineResult> {
+  const res = await fetch(`${API_BASE}/generate-arcs`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ videoUrl }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: "Pipeline failed" }));
+    throw new Error(err.error || `Pipeline failed (${res.status})`);
+  }
+  return res.json();
+}
+
+/** Generate a WhatsApp-ready journey from a selected arc spine */
+export async function generateJourney(
+  spine: Spine,
+  insights: Insight[],
+  quotes: Quote[]
+): Promise<{ journey: JourneyMessage[] }> {
+  const res = await fetch(`${API_BASE}/generate-journey`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ spine, insights, quotes }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: "Journey generation failed" }));
+    throw new Error(err.error || `Journey generation failed (${res.status})`);
+  }
+  return res.json();
+}
+
+/* ── Legacy helpers (signup / waitlist) ── */
+
 /** Submit the main signup form */
 export async function submitSignup(payload: SignupPayload): Promise<boolean> {
   try {
-    const res = await fetch(WEBHOOK_MAIN, {
+    const res = await fetch(`${API_BASE}/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
     if (res.ok) {
-      // Redirect to WhatsApp after successful submission
       window.location.href = `${WHATSAPP_LINK}?text=Hi%20Knowledge%20Tree%20Bot%20-%20unlock%20my%20learning%20journey!`;
       return true;
     }
@@ -70,39 +129,24 @@ export async function submitNotify(payload: NotifyPayload): Promise<boolean> {
 }
 
 /**
- * Extract insights from a YouTube URL.
- *
- * TODO (CTO): Connect this to your LLM pipeline backend.
- * Expected flow:
- *   1. POST the YouTube URL to your pipeline API
- *   2. Backend processes video → extracts transcript → runs LLM → returns insights
- *   3. Return the insights to the frontend
- *
- * For now this returns a placeholder response.
+ * Extract insights from a YouTube URL (calls the real pipeline).
+ * This is the main entry point used by the Hero component.
  */
 export async function extractInsights(payload: ExtractPayload): Promise<{
   success: boolean;
-  jobId?: string;
+  data?: PipelineResult;
   message?: string;
+  error?: string;
 }> {
-  // TODO: Replace with real API call
-  // const res = await fetch('/api/extract', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(payload),
-  // });
-  // return res.json();
-
-  console.log("Extract insights called with:", payload.youtubeUrl);
-
-  // Simulate processing
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        success: true,
-        jobId: "placeholder-" + Date.now(),
-        message: "Job submitted! Your video is being processed. It usually takes a few minutes.",
-      });
-    }, 1500);
-  });
+  try {
+    const data = await generateArcs(payload.youtubeUrl);
+    return {
+      success: true,
+      data,
+      message: `Found ${data.spines?.length || 0} learning arcs, ${data.insights?.length || 0} insights, and ${data.quotes?.length || 0} quotes.`,
+    };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Something went wrong";
+    return { success: false, error: message };
+  }
 }

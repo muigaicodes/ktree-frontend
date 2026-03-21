@@ -1,21 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import { extractInsights } from "@/lib/api";
+import { extractInsights, type PipelineResult } from "@/lib/api";
 
 export default function Hero() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<PipelineResult | null>(null);
 
   const handleExtract = async () => {
     if (!url.trim()) return;
     setLoading(true);
-    const result = await extractInsights({ youtubeUrl: url.trim() });
+    setError(null);
+    setResult(null);
+    setToast(null);
+
+    const res = await extractInsights({ youtubeUrl: url.trim() });
     setLoading(false);
-    if (result.success) {
-      setToast(result.message || "Processing your video...");
+
+    if (res.success && res.data) {
+      setResult(res.data);
+      setToast(res.message || "Pipeline complete!");
       setTimeout(() => setToast(null), 5000);
+    } else {
+      setError(res.error || "Something went wrong. Please try again.");
+      setTimeout(() => setError(null), 6000);
     }
   };
 
@@ -86,7 +97,7 @@ export default function Hero() {
           display: "flex",
           alignItems: "center",
           background: "#fff",
-          border: `1.5px solid ${loading ? "var(--kt-green)" : "var(--kt-border)"}`,
+          border: `1.5px solid ${loading ? "var(--kt-green)" : error ? "#dc2626" : "var(--kt-border)"}`,
           borderRadius: 999,
           padding: "5px 5px 5px 18px",
           maxWidth: 520,
@@ -183,8 +194,50 @@ export default function Hero() {
         </span>
       </div>
 
-      {/* Toast notification */}
-      {toast && (
+      {/* Loading state */}
+      {loading && (
+        <div
+          style={{
+            marginTop: 24,
+            padding: "16px 20px",
+            background: "rgba(11,74,36,0.04)",
+            borderRadius: 14,
+            maxWidth: 400,
+            marginLeft: "auto",
+            marginRight: "auto",
+          }}
+        >
+          <p style={{ fontSize: 13, color: "var(--kt-muted)", margin: 0, lineHeight: 1.5 }}>
+            Extracting transcript and running AI pipeline...
+            <br />
+            <span style={{ fontSize: 11, opacity: 0.7 }}>This may take 30-90 seconds on first request (server wake-up).</span>
+          </p>
+        </div>
+      )}
+
+      {/* Error notification */}
+      {error && (
+        <div
+          style={{
+            marginTop: 20,
+            background: "#fef2f2",
+            color: "#dc2626",
+            borderRadius: 14,
+            padding: "14px 20px",
+            fontSize: 13,
+            fontWeight: 600,
+            maxWidth: 400,
+            marginLeft: "auto",
+            marginRight: "auto",
+            border: "1px solid #fecaca",
+          }}
+        >
+          {error}
+        </div>
+      )}
+
+      {/* Success toast */}
+      {toast && !result && (
         <div
           style={{
             marginTop: 20,
@@ -201,6 +254,140 @@ export default function Hero() {
           }}
         >
           {toast}
+        </div>
+      )}
+
+      {/* Pipeline results */}
+      {result && (
+        <div
+          style={{
+            marginTop: 28,
+            textAlign: "left",
+            maxWidth: 520,
+            marginLeft: "auto",
+            marginRight: "auto",
+          }}
+        >
+          {/* Summary bar */}
+          <div
+            style={{
+              display: "flex",
+              gap: 12,
+              marginBottom: 20,
+              justifyContent: "center",
+            }}
+          >
+            {[
+              { label: "Arcs", count: result.spines?.length || 0, color: "#0B4A24" },
+              { label: "Insights", count: result.insights?.length || 0, color: "#1e40af" },
+              { label: "Quotes", count: result.quotes?.length || 0, color: "#92400e" },
+            ].map((s) => (
+              <div
+                key={s.label}
+                style={{
+                  background: "#fff",
+                  border: "1px solid var(--kt-border)",
+                  borderRadius: 12,
+                  padding: "10px 18px",
+                  textAlign: "center",
+                  flex: 1,
+                }}
+              >
+                <div style={{ fontSize: 22, fontWeight: 700, color: s.color }}>{s.count}</div>
+                <div style={{ fontSize: 11, color: "var(--kt-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Arc spines */}
+          {result.spines?.length > 0 && (
+            <div style={{ marginBottom: 20 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 10 }}>
+                Learning arcs
+              </h3>
+              {result.spines.map((spine, i) => (
+                <div
+                  key={i}
+                  style={{
+                    background: "#fff",
+                    border: "1px solid var(--kt-border)",
+                    borderRadius: 12,
+                    padding: "14px 16px",
+                    marginBottom: 8,
+                  }}
+                >
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "var(--kt-dark)" }}>
+                    {spine.title}
+                  </div>
+                  {spine.theme && (
+                    <div style={{ fontSize: 12, color: "var(--kt-muted)", marginTop: 4 }}>
+                      {spine.theme}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Top insights */}
+          {result.insights?.length > 0 && (
+            <div style={{ marginBottom: 20 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 10 }}>
+                Top insights
+              </h3>
+              {result.insights.slice(0, 5).map((insight, i) => (
+                <div
+                  key={i}
+                  style={{
+                    background: "#fff",
+                    border: "1px solid var(--kt-border)",
+                    borderRadius: 12,
+                    padding: "12px 16px",
+                    marginBottom: 8,
+                    fontSize: 13,
+                    color: "var(--kt-dark)",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {insight.text || (typeof insight === "string" ? insight : JSON.stringify(insight))}
+                </div>
+              ))}
+              {result.insights.length > 5 && (
+                <p style={{ fontSize: 12, color: "var(--kt-muted)", textAlign: "center" }}>
+                  +{result.insights.length - 5} more insights
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Quotes */}
+          {result.quotes?.length > 0 && (
+            <div>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 10 }}>
+                Key quotes
+              </h3>
+              {result.quotes.slice(0, 3).map((quote, i) => (
+                <div
+                  key={i}
+                  style={{
+                    background: "#fffbeb",
+                    border: "1px solid #fef3c7",
+                    borderRadius: 12,
+                    padding: "12px 16px",
+                    marginBottom: 8,
+                    fontSize: 13,
+                    color: "#92400e",
+                    lineHeight: 1.5,
+                    fontStyle: "italic",
+                  }}
+                >
+                  &ldquo;{quote.text || (typeof quote === "string" ? quote : JSON.stringify(quote))}&rdquo;
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </section>
