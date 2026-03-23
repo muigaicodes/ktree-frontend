@@ -78,109 +78,164 @@ export default function HowItWorks() {
         <div>
           <div
             style={{
-              background: "#1a1a1a",
+              background: "#111b21",
               borderRadius: 30,
-              padding: 12,
-              maxWidth: 240,
+              padding: 10,
+              maxWidth: 260,
               margin: "0 auto",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.18)",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.22)",
+              border: "3px solid #2a2a2a",
             }}
           >
-            <div style={{ background: "var(--kt-green)", borderRadius: 22, padding: "16px 14px" }}>
-              {/* Header */}
+            {/* Status bar */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "6px 10px 4px",
+                fontSize: 9,
+                color: "rgba(255,255,255,0.5)",
+              }}
+            >
+              <span>20:29</span>
+              <span>●●●</span>
+            </div>
+
+            {/* Chat header */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 10px",
+                borderBottom: "1px solid rgba(255,255,255,0.08)",
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M10 3L5 8l5 5" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
               <div
                 style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: "50%",
+                  background: "var(--kt-green)",
                   display: "flex",
                   alignItems: "center",
-                  gap: 8,
-                  marginBottom: 14,
-                  paddingBottom: 10,
-                  borderBottom: "1px solid rgba(255,255,255,0.15)",
+                  justifyContent: "center",
+                  fontSize: 10,
+                  color: "#fff",
+                  fontWeight: 700,
+                }}
+              >
+                KT
+              </div>
+              <span style={{ fontSize: 12, color: "#fff", fontWeight: 600 }}>Knowledge Tree</span>
+            </div>
+
+            {/* Chat body */}
+            <div style={{ padding: "10px 8px", minHeight: 260 }}>
+              {/* Video thumbnail bubble */}
+              <div
+                style={{
+                  background: "#1f2c34",
+                  borderRadius: "10px 10px 10px 3px",
+                  padding: 6,
+                  marginBottom: 6,
+                  maxWidth: "90%",
                 }}
               >
                 <div
                   style={{
-                    width: 24,
-                    height: 24,
-                    background: "rgba(255,255,255,0.2)",
-                    borderRadius: "50%",
+                    background: "#0a1014",
+                    borderRadius: 8,
+                    height: 80,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 6,
                   }}
-                />
-                <span style={{ fontSize: 12, color: "#fff", fontWeight: 600 }}>Knowledge Tree</span>
+                >
+                  <div
+                    style={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: "50%",
+                      background: "rgba(255,255,255,0.15)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M5 3l6 4-6 4V3z" fill="rgba(255,255,255,0.8)" />
+                    </svg>
+                  </div>
+                </div>
+                <div style={{ padding: "2px 6px 6px", fontSize: 11, lineHeight: 1.5, color: "rgba(255,255,255,0.9)" }}>
+                  <strong>*How do you build a great company?*</strong>
+                  <br /><br />
+                  In the clip above, Sam Altman walks through 9 things he has seen the best founders do:
+                </div>
               </div>
 
-              {/* Messages */}
+              {/* Insight message */}
               <div
                 style={{
-                  padding: "9px 12px",
-                  borderRadius: "12px 12px 12px 3px",
+                  background: "#1f2c34",
+                  borderRadius: "10px 10px 10px 3px",
+                  padding: "8px 10px",
+                  marginBottom: 6,
+                  maxWidth: "90%",
                   fontSize: 11,
                   lineHeight: 1.5,
-                  marginBottom: 6,
-                  background: "rgba(255,255,255,0.15)",
-                  color: "rgba(255,255,255,0.92)",
-                  maxWidth: "88%",
-                }}
-              >
-                <strong>Day 1: *How do you build a great company?*</strong>
-                <br /><br />
-                Sam Altman walks through 9 things the best founders do...
-              </div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", textAlign: "right", marginBottom: 6 }}>
-                10:09
-              </div>
-
-              <div
-                style={{
-                  padding: "9px 12px",
-                  borderRadius: "12px 12px 12px 3px",
-                  fontSize: 11,
-                  lineHeight: 1.5,
-                  marginBottom: 6,
-                  background: "rgba(255,255,255,0.15)",
-                  color: "rgba(255,255,255,0.92)",
-                  maxWidth: "88%",
+                  color: "rgba(255,255,255,0.9)",
                 }}
               >
                 <strong>*#1 Get to know your users really well*</strong>
                 <br /><br />
                 The best founders do customer support themselves.
               </div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", textAlign: "right", marginBottom: 6 }}>
-                10:10
-              </div>
 
+              {/* Second insight */}
               <div
                 style={{
-                  padding: "9px 12px",
-                  borderRadius: "12px 12px 3px 12px",
-                  fontSize: 11,
-                  lineHeight: 1.5,
+                  background: "#1f2c34",
+                  borderRadius: "10px 10px 10px 3px",
+                  padding: "8px 10px",
                   marginBottom: 6,
-                  background: "var(--kt-green-soft)",
-                  color: "var(--kt-dark)",
-                  maxWidth: "55%",
-                  marginLeft: "auto",
-                }}
-              >
-                This is gold
-              </div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", textAlign: "right", marginBottom: 6 }}>
-                10:12
-              </div>
-
-              <div
-                style={{
-                  padding: "9px 12px",
-                  borderRadius: "12px 12px 12px 3px",
+                  maxWidth: "90%",
                   fontSize: 11,
                   lineHeight: 1.5,
-                  background: "rgba(255,255,255,0.15)",
-                  color: "rgba(255,255,255,0.92)",
-                  maxWidth: "88%",
+                  color: "rgba(255,255,255,0.9)",
                 }}
               >
-                Tap <strong>next</strong> when you&apos;re ready for insight #2.
+                <strong>*#2 Have a short cycle time &amp; understand compound growth*</strong>
+                <br /><br />
+                The cycle here is: talk to customer → build product → get in front of user → repeat.
+              </div>
+            </div>
+
+            {/* Message input */}
+            <div
+              style={{
+                display: "flex",
+                gap: 6,
+                padding: "6px 8px 10px",
+                alignItems: "center",
+              }}
+            >
+              <div
+                style={{
+                  flex: 1,
+                  background: "#1f2c34",
+                  borderRadius: 20,
+                  padding: "7px 12px",
+                  fontSize: 10,
+                  color: "rgba(255,255,255,0.35)",
+                }}
+              >
+                Message
               </div>
             </div>
           </div>

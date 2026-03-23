@@ -144,9 +144,9 @@ export default function Hero() {
           onClick={handleExtract}
           disabled={loading}
           style={{
-            background: loading ? "var(--kt-green)" : "#fff",
-            color: loading ? "#fff" : "var(--kt-dark)",
-            border: loading ? "none" : "1.5px solid var(--kt-border)",
+            background: "var(--kt-green)",
+            color: "#fff",
+            border: "none",
             borderRadius: 999,
             padding: "10px 22px",
             fontSize: 13,
@@ -155,6 +155,7 @@ export default function Hero() {
             whiteSpace: "nowrap",
             fontFamily: "inherit",
             transition: "all 0.15s",
+            boxShadow: "0 6px 20px rgba(11,74,36,0.25)",
           }}
         >
           {loading ? "Processing..." : "Extract insights"}
@@ -163,6 +164,7 @@ export default function Hero() {
 
       {/* Trust signals */}
       <div
+        className="trust-signals"
         style={{
           display: "flex",
           justifyContent: "center",
