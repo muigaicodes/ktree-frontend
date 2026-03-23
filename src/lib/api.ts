@@ -30,23 +30,36 @@ export interface ExtractPayload {
 }
 
 export interface Spine {
+  id: string;
   title: string;
-  theme: string;
-  insightIds: string[];
+  summary: string;
+  targetOutcome: string;
+  insightIds?: string[];
 }
 
 export interface Insight {
   id: string;
-  text: string;
-  depth: number;
+  title: string;
+  insight: string;
+  evidence: string[];
 }
 
 export interface Quote {
   text: string;
-  speaker: string;
+  timestamp: string;
+  theme: string;
+}
+
+export interface VideoOverview {
+  hook: string;
+  summary: string;
+  themes: string[];
+  contentType: string;
+  estimatedDays: number;
 }
 
 export interface PipelineResult {
+  overview?: VideoOverview;
   spines: Spine[];
   insights: Insight[];
   quotes: Quote[];
@@ -143,7 +156,7 @@ export async function extractInsights(payload: ExtractPayload): Promise<{
     return {
       success: true,
       data,
-      message: `Found ${data.spines?.length || 0} learning arcs, ${data.insights?.length || 0} insights, and ${data.quotes?.length || 0} quotes.`,
+      message: `Found ${data.spines?.length || 0} learning journeys, ${data.insights?.length || 0} insights, and ${data.quotes?.length || 0} quotes.`,
     };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Something went wrong";

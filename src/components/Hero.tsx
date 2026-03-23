@@ -9,8 +9,7 @@ export default function Hero() {
   const [toast, setToast] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<PipelineResult | null>(null);
-  const [showAllInsights, setShowAllInsights] = useState(false);
-  const [showAllQuotes, setShowAllQuotes] = useState(false);
+  const [expandedJourney, setExpandedJourney] = useState<number | null>(null);
 
   const handleExtract = async () => {
     if (!url.trim()) return;
@@ -18,8 +17,7 @@ export default function Hero() {
     setError(null);
     setResult(null);
     setToast(null);
-    setShowAllInsights(false);
-    setShowAllQuotes(false);
+    setExpandedJourney(null);
 
     const res = await extractInsights({ youtubeUrl: url.trim() });
     setLoading(false);
@@ -268,11 +266,62 @@ export default function Hero() {
           style={{
             marginTop: 28,
             textAlign: "left",
-            maxWidth: 520,
+            maxWidth: 560,
             marginLeft: "auto",
             marginRight: "auto",
           }}
         >
+          {/* Video Overview */}
+          {result.overview && (
+            <div
+              style={{
+                background: "linear-gradient(135deg, rgba(11,74,36,0.04), rgba(11,74,36,0.08))",
+                border: "1px solid rgba(11,74,36,0.12)",
+                borderRadius: 16,
+                padding: "20px 22px",
+                marginBottom: 20,
+              }}
+            >
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--kt-dark)", lineHeight: 1.4, marginBottom: 8 }}>
+                {result.overview.hook}
+              </div>
+              <div style={{ fontSize: 13, color: "var(--kt-muted)", lineHeight: 1.6, marginBottom: 12 }}>
+                {result.overview.summary}
+              </div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {result.overview.themes?.map((theme: string, i: number) => (
+                  <span
+                    key={i}
+                    style={{
+                      background: "rgba(11,74,36,0.08)",
+                      color: "var(--kt-green)",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      padding: "4px 10px",
+                      borderRadius: 999,
+                    }}
+                  >
+                    {theme}
+                  </span>
+                ))}
+                {result.overview.contentType && (
+                  <span
+                    style={{
+                      background: "rgba(30,64,175,0.08)",
+                      color: "#1e40af",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      padding: "4px 10px",
+                      borderRadius: 999,
+                    }}
+                  >
+                    {result.overview.contentType}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Summary bar */}
           <div
             style={{
@@ -283,7 +332,7 @@ export default function Hero() {
             }}
           >
             {[
-              { label: "Arcs", count: result.spines?.length || 0, color: "#0B4A24" },
+              { label: "Journeys", count: result.spines?.length || 0, color: "#0B4A24" },
               { label: "Insights", count: result.insights?.length || 0, color: "#1e40af" },
               { label: "Quotes", count: result.quotes?.length || 0, color: "#92400e" },
             ].map((s) => (
@@ -306,137 +355,185 @@ export default function Hero() {
             ))}
           </div>
 
-          {/* Arc spines */}
-          {result.spines?.length > 0 && (
-            <div style={{ marginBottom: 20 }}>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 10 }}>
-                Learning arcs
-              </h3>
-              {result.spines.map((spine: any, i: number) => (
-                <div
-                  key={i}
-                  style={{
-                    background: "#fff",
-                    border: "1px solid var(--kt-border)",
-                    borderRadius: 12,
-                    padding: "14px 16px",
-                    marginBottom: 8,
-                  }}
-                >
-                  <div style={{ fontSize: 14, fontWeight: 600, color: "var(--kt-dark)" }}>
-                    {spine.title}
-                  </div>
-                  {(spine.summary || spine.theme || spine.targetOutcome) && (
-                    <div style={{ fontSize: 12, color: "var(--kt-muted)", marginTop: 4, lineHeight: 1.5 }}>
-                      {spine.summary || spine.theme || spine.targetOutcome}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+          {/* Section heading */}
+          <h3 style={{ fontSize: 17, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 14, textAlign: "center" }}>
+            Your learning journeys
+          </h3>
 
-          {/* Insights */}
-          {result.insights?.length > 0 && (
-            <div style={{ marginBottom: 20 }}>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 10 }}>
-                Top insights
-              </h3>
-              {result.insights.slice(0, showAllInsights ? undefined : 5).map((insight: any, i: number) => (
-                <div
-                  key={i}
-                  style={{
-                    background: "#fff",
-                    border: "1px solid var(--kt-border)",
-                    borderRadius: 12,
-                    padding: "12px 16px",
-                    marginBottom: 8,
-                  }}
-                >
-                  {insight.title && (
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--kt-dark)", marginBottom: 4 }}>
-                      {insight.title}
-                    </div>
-                  )}
-                  <div style={{ fontSize: 13, color: "var(--kt-muted)", lineHeight: 1.5 }}>
-                    {insight.insight || insight.text || (typeof insight === "string" ? insight : "")}
-                  </div>
-                </div>
-              ))}
-              {result.insights.length > 5 && (
-                <button
-                  onClick={() => setShowAllInsights(!showAllInsights)}
-                  style={{
-                    display: "block",
-                    margin: "8px auto",
-                    background: "var(--kt-green)",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: 999,
-                    padding: "8px 20px",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    fontFamily: "inherit",
-                  }}
-                >
-                  {showAllInsights ? "Show less" : `+${result.insights.length - 5} more insights`}
-                </button>
-              )}
-            </div>
-          )}
+          {/* Learning Journeys as accordions */}
+          {result.spines?.map((spine: any, spineIndex: number) => {
+            // Use insightIds if available, otherwise distribute evenly
+            let journeyInsights: any[];
+            if (spine.insightIds && spine.insightIds.length > 0) {
+              journeyInsights = spine.insightIds
+                .map((id: string) => (result.insights || []).find((ins: any) => ins.id === id))
+                .filter(Boolean);
+            } else {
+              const insightsPerJourney = Math.max(1, Math.ceil((result.insights?.length || 0) / (result.spines?.length || 1)));
+              const startIdx = spineIndex * insightsPerJourney;
+              journeyInsights = (result.insights || []).slice(startIdx, startIdx + insightsPerJourney);
+            }
+            const quotesPerJourney = Math.max(1, Math.ceil((result.quotes?.length || 0) / (result.spines?.length || 1)));
+            const journeyQuotes = (result.quotes || []).slice(spineIndex * quotesPerJourney, (spineIndex + 1) * quotesPerJourney);
+            const isExpanded = expandedJourney === spineIndex;
 
-          {/* Quotes */}
-          {result.quotes?.length > 0 && (
-            <div style={{ marginBottom: 20 }}>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 10 }}>
-                Key quotes
-              </h3>
-              {result.quotes.slice(0, showAllQuotes ? undefined : 3).map((quote: any, i: number) => (
+            return (
+              <div
+                key={spineIndex}
+                style={{
+                  background: "#fff",
+                  border: isExpanded ? "1.5px solid var(--kt-green)" : "1px solid var(--kt-border)",
+                  borderRadius: 16,
+                  marginBottom: 12,
+                  overflow: "hidden",
+                  boxShadow: isExpanded ? "0 8px 24px rgba(11,74,36,0.08)" : "none",
+                  transition: "all 0.2s",
+                }}
+              >
+                {/* Journey header — clickable */}
                 <div
-                  key={i}
+                  onClick={() => setExpandedJourney(isExpanded ? null : spineIndex)}
                   style={{
-                    background: "#fffbeb",
-                    border: "1px solid #fef3c7",
-                    borderRadius: 12,
-                    padding: "12px 16px",
-                    marginBottom: 8,
-                    fontSize: 13,
-                    color: "#92400e",
-                    lineHeight: 1.5,
-                    fontStyle: "italic",
-                  }}
-                >
-                  &ldquo;{quote.text || (typeof quote === "string" ? quote : "")}&rdquo;
-                  {quote.theme && (
-                    <div style={{ fontSize: 11, color: "#b07d10", marginTop: 6, fontStyle: "normal", fontWeight: 600 }}>
-                      {quote.theme}
-                    </div>
-                  )}
-                </div>
-              ))}
-              {result.quotes.length > 3 && (
-                <button
-                  onClick={() => setShowAllQuotes(!showAllQuotes)}
-                  style={{
-                    display: "block",
-                    margin: "8px auto",
-                    background: "var(--kt-green)",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: 999,
-                    padding: "8px 20px",
-                    fontSize: 12,
-                    fontWeight: 600,
+                    padding: "16px 18px",
                     cursor: "pointer",
-                    fontFamily: "inherit",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    gap: 12,
                   }}
                 >
-                  {showAllQuotes ? "Show less" : `+${result.quotes.length - 3} more quotes`}
-                </button>
-              )}
-            </div>
-          )}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                      <span
+                        style={{
+                          background: "rgba(11,74,36,0.08)",
+                          color: "var(--kt-green)",
+                          fontSize: 10,
+                          fontWeight: 700,
+                          padding: "3px 8px",
+                          borderRadius: 999,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                        }}
+                      >
+                        Journey {spineIndex + 1}
+                      </span>
+                      <span style={{ fontSize: 11, color: "var(--kt-muted)" }}>
+                        {journeyInsights.length} days
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: "var(--kt-dark)", lineHeight: 1.3 }}>
+                      {spine.title}
+                    </div>
+                    {(spine.summary || spine.targetOutcome) && (
+                      <div style={{ fontSize: 12, color: "var(--kt-muted)", marginTop: 4, lineHeight: 1.5 }}>
+                        {spine.summary}
+                      </div>
+                    )}
+                  </div>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    style={{
+                      flexShrink: 0,
+                      marginTop: 4,
+                      transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 0.2s",
+                    }}
+                  >
+                    <path d="M5 8l5 5 5-5" stroke="var(--kt-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+
+                {/* Expanded content — daily insights */}
+                {isExpanded && (
+                  <div style={{ padding: "0 18px 16px" }}>
+                    {spine.targetOutcome && (
+                      <div
+                        style={{
+                          background: "rgba(11,74,36,0.04)",
+                          borderRadius: 10,
+                          padding: "10px 14px",
+                          marginBottom: 14,
+                          fontSize: 12,
+                          color: "var(--kt-green)",
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        <strong>Goal:</strong> {spine.targetOutcome}
+                      </div>
+                    )}
+
+                    {journeyInsights.map((insight: any, dayIndex: number) => (
+                      <div
+                        key={dayIndex}
+                        style={{
+                          display: "flex",
+                          gap: 12,
+                          padding: "12px 0",
+                          borderTop: dayIndex > 0 ? "1px dashed var(--kt-border)" : "none",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: "50%",
+                            background: "rgba(11,74,36,0.06)",
+                            color: "var(--kt-green)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 11,
+                            fontWeight: 700,
+                            flexShrink: 0,
+                          }}
+                        >
+                          {dayIndex + 1}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          {insight.title && (
+                            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--kt-dark)", marginBottom: 3 }}>
+                              {insight.title}
+                            </div>
+                          )}
+                          <div style={{ fontSize: 12, color: "var(--kt-muted)", lineHeight: 1.5 }}>
+                            {insight.insight || insight.text || ""}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Journey quotes */}
+                    {journeyQuotes.length > 0 && (
+                      <div style={{ marginTop: 10 }}>
+                        {journeyQuotes.map((quote: any, qi: number) => (
+                          <div
+                            key={qi}
+                            style={{
+                              background: "#fffbeb",
+                              border: "1px solid #fef3c7",
+                              borderRadius: 10,
+                              padding: "10px 14px",
+                              marginBottom: 6,
+                              fontSize: 12,
+                              color: "#92400e",
+                              lineHeight: 1.5,
+                              fontStyle: "italic",
+                            }}
+                          >
+                            &ldquo;{quote.text || ""}&rdquo;
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </section>
