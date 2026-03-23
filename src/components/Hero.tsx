@@ -9,6 +9,8 @@ export default function Hero() {
   const [toast, setToast] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<PipelineResult | null>(null);
+  const [showAllInsights, setShowAllInsights] = useState(false);
+  const [showAllQuotes, setShowAllQuotes] = useState(false);
 
   const handleExtract = async () => {
     if (!url.trim()) return;
@@ -16,6 +18,8 @@ export default function Hero() {
     setError(null);
     setResult(null);
     setToast(null);
+    setShowAllInsights(false);
+    setShowAllQuotes(false);
 
     const res = await extractInsights({ youtubeUrl: url.trim() });
     setLoading(false);
@@ -308,7 +312,7 @@ export default function Hero() {
               <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 10 }}>
                 Learning arcs
               </h3>
-              {result.spines.map((spine, i) => (
+              {result.spines.map((spine: any, i: number) => (
                 <div
                   key={i}
                   style={{
@@ -322,9 +326,9 @@ export default function Hero() {
                   <div style={{ fontSize: 14, fontWeight: 600, color: "var(--kt-dark)" }}>
                     {spine.title}
                   </div>
-                  {spine.theme && (
-                    <div style={{ fontSize: 12, color: "var(--kt-muted)", marginTop: 4 }}>
-                      {spine.theme}
+                  {(spine.summary || spine.theme || spine.targetOutcome) && (
+                    <div style={{ fontSize: 12, color: "var(--kt-muted)", marginTop: 4, lineHeight: 1.5 }}>
+                      {spine.summary || spine.theme || spine.targetOutcome}
                     </div>
                   )}
                 </div>
@@ -332,13 +336,13 @@ export default function Hero() {
             </div>
           )}
 
-          {/* Top insights */}
+          {/* Insights */}
           {result.insights?.length > 0 && (
             <div style={{ marginBottom: 20 }}>
               <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 10 }}>
                 Top insights
               </h3>
-              {result.insights.slice(0, 5).map((insight, i) => (
+              {result.insights.slice(0, showAllInsights ? undefined : 5).map((insight: any, i: number) => (
                 <div
                   key={i}
                   style={{
@@ -347,29 +351,48 @@ export default function Hero() {
                     borderRadius: 12,
                     padding: "12px 16px",
                     marginBottom: 8,
-                    fontSize: 13,
-                    color: "var(--kt-dark)",
-                    lineHeight: 1.5,
                   }}
                 >
-                  {insight.text || (typeof insight === "string" ? insight : JSON.stringify(insight))}
+                  {insight.title && (
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--kt-dark)", marginBottom: 4 }}>
+                      {insight.title}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 13, color: "var(--kt-muted)", lineHeight: 1.5 }}>
+                    {insight.insight || insight.text || (typeof insight === "string" ? insight : "")}
+                  </div>
                 </div>
               ))}
               {result.insights.length > 5 && (
-                <p style={{ fontSize: 12, color: "var(--kt-muted)", textAlign: "center" }}>
-                  +{result.insights.length - 5} more insights
-                </p>
+                <button
+                  onClick={() => setShowAllInsights(!showAllInsights)}
+                  style={{
+                    display: "block",
+                    margin: "8px auto",
+                    background: "var(--kt-green)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 999,
+                    padding: "8px 20px",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  {showAllInsights ? "Show less" : `+${result.insights.length - 5} more insights`}
+                </button>
               )}
             </div>
           )}
 
           {/* Quotes */}
           {result.quotes?.length > 0 && (
-            <div>
+            <div style={{ marginBottom: 20 }}>
               <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 10 }}>
                 Key quotes
               </h3>
-              {result.quotes.slice(0, 3).map((quote, i) => (
+              {result.quotes.slice(0, showAllQuotes ? undefined : 3).map((quote: any, i: number) => (
                 <div
                   key={i}
                   style={{
@@ -384,9 +407,34 @@ export default function Hero() {
                     fontStyle: "italic",
                   }}
                 >
-                  &ldquo;{quote.text || (typeof quote === "string" ? quote : JSON.stringify(quote))}&rdquo;
+                  &ldquo;{quote.text || (typeof quote === "string" ? quote : "")}&rdquo;
+                  {quote.theme && (
+                    <div style={{ fontSize: 11, color: "#b07d10", marginTop: 6, fontStyle: "normal", fontWeight: 600 }}>
+                      {quote.theme}
+                    </div>
+                  )}
                 </div>
               ))}
+              {result.quotes.length > 3 && (
+                <button
+                  onClick={() => setShowAllQuotes(!showAllQuotes)}
+                  style={{
+                    display: "block",
+                    margin: "8px auto",
+                    background: "var(--kt-green)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 999,
+                    padding: "8px 20px",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  {showAllQuotes ? "Show less" : `+${result.quotes.length - 3} more quotes`}
+                </button>
+              )}
             </div>
           )}
         </div>
