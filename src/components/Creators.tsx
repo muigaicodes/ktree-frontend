@@ -16,14 +16,12 @@ export default function Creators() {
       </h2>
 
       <div
+        className="creators-flex"
         style={{
           background: "rgba(11,74,36,0.03)",
           border: "1px solid rgba(11,74,36,0.1)",
           borderRadius: "var(--kt-radius-xl)",
           padding: 32,
-          display: "flex",
-          gap: 32,
-          alignItems: "flex-start",
         }}
       >
         {/* Left content */}
@@ -104,9 +102,8 @@ export default function Creators() {
 
         {/* Right — featured creators */}
         <div
+          className="creators-sidebar"
           style={{
-            width: 280,
-            flexShrink: 0,
             background: "#fff",
             border: "1px solid var(--kt-border)",
             borderRadius: "var(--kt-radius-lg)",

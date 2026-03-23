@@ -1,7 +1,12 @@
 "use client";
 
+import { useState } from "react";
+
 export default function Navbar() {
+  const [open, setOpen] = useState(false);
+
   const scrollTo = (id: string) => {
+    setOpen(false);
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -47,15 +52,9 @@ export default function Navbar() {
           Beta
         </span>
       </div>
-      <div
-        style={{
-          marginLeft: "auto",
-          display: "flex",
-          gap: 20,
-          fontSize: 14,
-          color: "var(--kt-muted)",
-        }}
-      >
+
+      {/* Desktop links */}
+      <div className={`nav-links${open ? " open" : ""}`}>
         {[
           { label: "Home", id: "home" },
           { label: "How it works", id: "how-it-works" },
@@ -73,6 +72,19 @@ export default function Navbar() {
           </span>
         ))}
       </div>
+
+      {/* Hamburger button */}
+      <button className="nav-hamburger" onClick={() => setOpen(!open)} aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          {open ? (
+            <path d="M5 5l10 10M15 5L5 15" stroke="var(--kt-dark)" strokeWidth="1.5" strokeLinecap="round" />
+          ) : (
+            <>
+              <path d="M3 6h14M3 10h14M3 14h14" stroke="var(--kt-dark)" strokeWidth="1.5" strokeLinecap="round" />
+            </>
+          )}
+        </svg>
+      </button>
     </nav>
   );
 }

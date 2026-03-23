@@ -222,13 +222,7 @@ export default function Journeys() {
         </div>
 
         {/* Journey cards grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 18,
-          }}
-        >
+        <div className="journey-grid">
           {filtered.map((j, i) => (
             <article
               key={i}

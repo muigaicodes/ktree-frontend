@@ -65,8 +65,8 @@ export default function Hero() {
 
       {/* Heading */}
       <h1
+        className="hero-title"
         style={{
-          fontSize: 40,
           fontWeight: 800,
           color: "var(--kt-dark)",
           lineHeight: 1.12,
@@ -93,9 +93,8 @@ export default function Hero() {
 
       {/* URL Input */}
       <div
+        className="hero-input-row"
         style={{
-          display: "flex",
-          alignItems: "center",
           background: "#fff",
           border: `1.5px solid ${loading ? "var(--kt-green)" : error ? "#dc2626" : "var(--kt-border)"}`,
           borderRadius: 999,

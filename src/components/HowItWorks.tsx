@@ -31,7 +31,7 @@ export default function HowItWorks() {
         </p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 40, alignItems: "center" }}>
+      <div className="howitworks-grid">
         {/* Steps */}
         <div style={{ display: "flex", flexDirection: "column" }}>
           {steps.map((step, i) => (
