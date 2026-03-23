@@ -75,170 +75,17 @@ export default function HowItWorks() {
         </div>
 
         {/* Phone mockup */}
-        <div>
-          <div
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <img
+            src="/phone_mockup.png"
+            alt="WhatsApp learning journey preview"
             style={{
-              background: "#111b21",
-              borderRadius: 30,
-              padding: 10,
               maxWidth: 260,
-              margin: "0 auto",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.22)",
-              border: "3px solid #2a2a2a",
+              width: "100%",
+              borderRadius: 24,
+              boxShadow: "0 20px 50px rgba(0,0,0,0.15)",
             }}
-          >
-            {/* Status bar */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "6px 10px 4px",
-                fontSize: 9,
-                color: "rgba(255,255,255,0.5)",
-              }}
-            >
-              <span>20:29</span>
-              <span>●●●</span>
-            </div>
-
-            {/* Chat header */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "8px 10px",
-                borderBottom: "1px solid rgba(255,255,255,0.08)",
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M10 3L5 8l5 5" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <div
-                style={{
-                  width: 26,
-                  height: 26,
-                  borderRadius: "50%",
-                  background: "var(--kt-green)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 10,
-                  color: "#fff",
-                  fontWeight: 700,
-                }}
-              >
-                KT
-              </div>
-              <span style={{ fontSize: 12, color: "#fff", fontWeight: 600 }}>Knowledge Tree</span>
-            </div>
-
-            {/* Chat body */}
-            <div style={{ padding: "10px 8px", minHeight: 260 }}>
-              {/* Video thumbnail bubble */}
-              <div
-                style={{
-                  background: "#1f2c34",
-                  borderRadius: "10px 10px 10px 3px",
-                  padding: 6,
-                  marginBottom: 6,
-                  maxWidth: "90%",
-                }}
-              >
-                <div
-                  style={{
-                    background: "#0a1014",
-                    borderRadius: 8,
-                    height: 80,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginBottom: 6,
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: "50%",
-                      background: "rgba(255,255,255,0.15)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M5 3l6 4-6 4V3z" fill="rgba(255,255,255,0.8)" />
-                    </svg>
-                  </div>
-                </div>
-                <div style={{ padding: "2px 6px 6px", fontSize: 11, lineHeight: 1.5, color: "rgba(255,255,255,0.9)" }}>
-                  <strong>*How do you build a great company?*</strong>
-                  <br /><br />
-                  In the clip above, Sam Altman walks through 9 things he has seen the best founders do:
-                </div>
-              </div>
-
-              {/* Insight message */}
-              <div
-                style={{
-                  background: "#1f2c34",
-                  borderRadius: "10px 10px 10px 3px",
-                  padding: "8px 10px",
-                  marginBottom: 6,
-                  maxWidth: "90%",
-                  fontSize: 11,
-                  lineHeight: 1.5,
-                  color: "rgba(255,255,255,0.9)",
-                }}
-              >
-                <strong>*#1 Get to know your users really well*</strong>
-                <br /><br />
-                The best founders do customer support themselves.
-              </div>
-
-              {/* Second insight */}
-              <div
-                style={{
-                  background: "#1f2c34",
-                  borderRadius: "10px 10px 10px 3px",
-                  padding: "8px 10px",
-                  marginBottom: 6,
-                  maxWidth: "90%",
-                  fontSize: 11,
-                  lineHeight: 1.5,
-                  color: "rgba(255,255,255,0.9)",
-                }}
-              >
-                <strong>*#2 Have a short cycle time &amp; understand compound growth*</strong>
-                <br /><br />
-                The cycle here is: talk to customer → build product → get in front of user → repeat.
-              </div>
-            </div>
-
-            {/* Message input */}
-            <div
-              style={{
-                display: "flex",
-                gap: 6,
-                padding: "6px 8px 10px",
-                alignItems: "center",
-              }}
-            >
-              <div
-                style={{
-                  flex: 1,
-                  background: "#1f2c34",
-                  borderRadius: 20,
-                  padding: "7px 12px",
-                  fontSize: 10,
-                  color: "rgba(255,255,255,0.35)",
-                }}
-              >
-                Message
-              </div>
-            </div>
-          </div>
+          />
         </div>
       </div>
     </section>
