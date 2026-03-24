@@ -10,6 +10,11 @@ export default function Hero() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<PipelineResult | null>(null);
   const [expandedJourney, setExpandedJourney] = useState<number | null>(null);
+  const [showSignup, setShowSignup] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [signupDone, setSignupDone] = useState(false);
 
   const handleExtract = async () => {
     if (!url.trim()) return;
@@ -18,6 +23,11 @@ export default function Hero() {
     setResult(null);
     setToast(null);
     setExpandedJourney(null);
+    setShowSignup(false);
+    setSignupDone(false);
+    setPhone("");
+    setUserName("");
+    setUserEmail("");
 
     const res = await extractInsights({ youtubeUrl: url.trim() });
     setLoading(false);
@@ -30,6 +40,30 @@ export default function Hero() {
       setError(res.error || "Something went wrong. Please try again.");
       setTimeout(() => setError(null), 6000);
     }
+  };
+
+  const handleWhatsAppSignup = () => {
+    if (!phone.trim() || !result) return;
+    setSignupDone(true);
+
+    // Build journey summary for the WhatsApp message
+    const journeyNames = result.spines?.map((s: any) => s.title).join(", ") || "learning insights";
+    const speaker = result.overview?.speaker || "";
+    const name = userName.trim() || "there";
+
+    const message = encodeURIComponent(
+      `Hi Knowledge Tree! I'm ${name} and I'd like to start learning.\n\n` +
+      (speaker ? `Speaker: ${speaker}\n` : "") +
+      `Journeys: ${journeyNames}\n` +
+      `Video: ${url}\n` +
+      (userEmail.trim() ? `Email: ${userEmail.trim()}\n` : "") +
+      `\nSend me my first insight!`
+    );
+
+    // Redirect to WhatsApp after a short delay
+    setTimeout(() => {
+      window.open(`https://wa.me/250791276393?text=${message}`, "_blank");
+    }, 1000);
   };
 
   return (
@@ -522,6 +556,134 @@ export default function Hero() {
               </div>
             );
           })}
+
+          {/* WhatsApp CTA */}
+          <div
+            style={{
+              marginTop: 24,
+              background: "var(--kt-green)",
+              borderRadius: 16,
+              padding: "24px 22px",
+              textAlign: "center",
+            }}
+          >
+            {signupDone ? (
+              <div>
+                <div style={{ fontSize: 20, marginBottom: 6 }}>✓</div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: "#fff", marginBottom: 4 }}>
+                  You&apos;re all set!
+                </div>
+                <div style={{ fontSize: 13, color: "rgba(255,255,255,0.75)" }}>
+                  Opening WhatsApp now...
+                </div>
+              </div>
+            ) : !showSignup ? (
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#fff", marginBottom: 6 }}>
+                  Get these insights on WhatsApp
+                </div>
+                <div style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", marginBottom: 16, lineHeight: 1.5 }}>
+                  {result.spines?.length || 0} learning journeys, {result.insights?.length || 0} insights. We&apos;ll send your first insight right away — type MORE anytime to get the next one.
+                </div>
+                <button
+                  onClick={() => setShowSignup(true)}
+                  style={{
+                    background: "#fff",
+                    color: "var(--kt-green)",
+                    border: "none",
+                    borderRadius: 999,
+                    padding: "12px 28px",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                    boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
+                  }}
+                >
+                  Start learning →
+                </button>
+              </div>
+            ) : (
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 14 }}>
+                  Where should we send your insights?
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                    maxWidth: 340,
+                    margin: "0 auto",
+                  }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Your name"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    style={{
+                      border: "none",
+                      borderRadius: 999,
+                      padding: "11px 16px",
+                      fontSize: 14,
+                      fontFamily: "inherit",
+                      outline: "none",
+                    }}
+                  />
+                  <input
+                    type="tel"
+                    placeholder="WhatsApp number (e.g. +254 7XX)"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    style={{
+                      border: "none",
+                      borderRadius: 999,
+                      padding: "11px 16px",
+                      fontSize: 14,
+                      fontFamily: "inherit",
+                      outline: "none",
+                    }}
+                  />
+                  <input
+                    type="email"
+                    placeholder="Email address"
+                    value={userEmail}
+                    onChange={(e) => setUserEmail(e.target.value)}
+                    style={{
+                      border: "none",
+                      borderRadius: 999,
+                      padding: "11px 16px",
+                      fontSize: 14,
+                      fontFamily: "inherit",
+                      outline: "none",
+                    }}
+                  />
+                  <button
+                    onClick={handleWhatsAppSignup}
+                    disabled={!phone.trim()}
+                    style={{
+                      background: phone.trim() ? "#fff" : "rgba(255,255,255,0.4)",
+                      color: "var(--kt-green)",
+                      border: "none",
+                      borderRadius: 999,
+                      padding: "12px 20px",
+                      fontSize: 14,
+                      fontWeight: 600,
+                      cursor: phone.trim() ? "pointer" : "default",
+                      fontFamily: "inherit",
+                      marginTop: 4,
+                    }}
+                  >
+                    Send me insights →
+                  </button>
+                </div>
+                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 10 }}>
+                  No spam, ever. Just your learning journey.
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </section>
