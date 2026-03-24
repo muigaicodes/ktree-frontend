@@ -42,11 +42,37 @@ export default function Hero() {
     }
   };
 
-  const handleWhatsAppSignup = () => {
+  const handleWhatsAppSignup = async () => {
     if (!phone.trim() || !result) return;
+
+    // Save to Supabase via backend
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ktree-api.onrender.com";
+      const res = await fetch(`${API_BASE}/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: userName.trim(),
+          phone: phone.trim(),
+          email: userEmail.trim(),
+          videoUrl: url,
+          overview: result.overview || {},
+          spines: result.spines || [],
+          insights: result.insights || [],
+          quotes: result.quotes || [],
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        console.log("Signup saved:", data.journeySlugs);
+      }
+    } catch (err) {
+      console.warn("Signup save failed, continuing to WhatsApp:", err);
+    }
+
     setSignupDone(true);
 
-    // Build journey summary for the WhatsApp message
+    // Build WhatsApp message
     const journeyNames = result.spines?.map((s: any) => s.title).join(", ") || "learning insights";
     const speaker = result.overview?.speaker || "";
     const name = userName.trim() || "there";
@@ -60,7 +86,6 @@ export default function Hero() {
       `\nSend me my first insight!`
     );
 
-    // Redirect to WhatsApp after a short delay
     setTimeout(() => {
       window.open(`https://wa.me/250791276393?text=${message}`, "_blank");
     }, 1000);
