@@ -282,6 +282,12 @@ export default function Hero() {
                 marginBottom: 20,
               }}
             >
+              {(result.overview.speaker || (result.speakers && result.speakers.length > 0)) && (
+                <div style={{ fontSize: 12, color: "var(--kt-green)", fontWeight: 600, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  {result.overview.speaker || result.speakers?.[0]}
+                  {result.overview.contentType && <span style={{ color: "var(--kt-muted)", fontWeight: 500, textTransform: "lowercase", letterSpacing: 0 }}> — {result.overview.contentType}</span>}
+                </div>
+              )}
               <div style={{ fontSize: 15, fontWeight: 700, color: "var(--kt-dark)", lineHeight: 1.4, marginBottom: 8 }}>
                 {result.overview.hook}
               </div>
@@ -304,20 +310,6 @@ export default function Hero() {
                     {theme}
                   </span>
                 ))}
-                {result.overview.contentType && (
-                  <span
-                    style={{
-                      background: "rgba(30,64,175,0.08)",
-                      color: "#1e40af",
-                      fontSize: 11,
-                      fontWeight: 600,
-                      padding: "4px 10px",
-                      borderRadius: 999,
-                    }}
-                  >
-                    {result.overview.contentType}
-                  </span>
-                )}
               </div>
             </div>
           )}
@@ -470,65 +462,61 @@ export default function Hero() {
                       <div
                         key={dayIndex}
                         style={{
-                          display: "flex",
-                          gap: 12,
-                          padding: "12px 0",
+                          padding: "14px 0",
                           borderTop: dayIndex > 0 ? "1px dashed var(--kt-border)" : "none",
                         }}
                       >
-                        <div
-                          style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: "50%",
-                            background: "rgba(11,74,36,0.06)",
-                            color: "var(--kt-green)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: 11,
-                            fontWeight: 700,
-                            flexShrink: 0,
-                          }}
-                        >
-                          {dayIndex + 1}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          {insight.title && (
-                            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--kt-dark)", marginBottom: 3 }}>
-                              {insight.title}
+                        <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                          <div
+                            style={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: "50%",
+                              background: "rgba(11,74,36,0.06)",
+                              color: "var(--kt-green)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: 11,
+                              fontWeight: 700,
+                              flexShrink: 0,
+                            }}
+                          >
+                            {dayIndex + 1}
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            {insight.title && (
+                              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--kt-dark)", marginBottom: 6 }}>
+                                {insight.title}
+                              </div>
+                            )}
+                            {/* Lead with verbatim quote if available */}
+                            {insight.evidence && insight.evidence.length > 0 && (
+                              <div
+                                style={{
+                                  background: "#fffbeb",
+                                  border: "1px solid #fef3c7",
+                                  borderRadius: 10,
+                                  padding: "10px 14px",
+                                  marginBottom: 8,
+                                  fontSize: 12,
+                                  color: "#92400e",
+                                  lineHeight: 1.5,
+                                  fontStyle: "italic",
+                                }}
+                              >
+                                &ldquo;{insight.evidence[0]}&rdquo;
+                              </div>
+                            )}
+                            {/* Then the explanation */}
+                            <div style={{ fontSize: 12, color: "var(--kt-muted)", lineHeight: 1.6 }}>
+                              {insight.insight || insight.text || ""}
                             </div>
-                          )}
-                          <div style={{ fontSize: 12, color: "var(--kt-muted)", lineHeight: 1.5 }}>
-                            {insight.insight || insight.text || ""}
                           </div>
                         </div>
                       </div>
                     ))}
 
-                    {/* Journey quotes */}
-                    {journeyQuotes.length > 0 && (
-                      <div style={{ marginTop: 10 }}>
-                        {journeyQuotes.map((quote: any, qi: number) => (
-                          <div
-                            key={qi}
-                            style={{
-                              background: "#fffbeb",
-                              border: "1px solid #fef3c7",
-                              borderRadius: 10,
-                              padding: "10px 14px",
-                              marginBottom: 6,
-                              fontSize: 12,
-                              color: "#92400e",
-                              lineHeight: 1.5,
-                              fontStyle: "italic",
-                            }}
-                          >
-                            &ldquo;{quote.text || ""}&rdquo;
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 )}
               </div>

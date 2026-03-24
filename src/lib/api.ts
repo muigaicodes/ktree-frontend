@@ -46,7 +46,8 @@ export interface Insight {
 
 export interface Quote {
   text: string;
-  timestamp: string;
+  speaker?: string;
+  timestamp?: string;
   theme: string;
 }
 
@@ -55,11 +56,13 @@ export interface VideoOverview {
   summary: string;
   themes: string[];
   contentType: string;
+  speaker?: string;
   estimatedDays: number;
 }
 
 export interface PipelineResult {
   overview?: VideoOverview;
+  speakers?: string[];
   spines: Spine[];
   insights: Insight[];
   quotes: Quote[];
