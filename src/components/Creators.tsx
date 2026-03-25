@@ -16,12 +16,14 @@ export default function Creators() {
       </h2>
 
       <div
-        className="creators-flex"
         style={{
           background: "rgba(11,74,36,0.03)",
           border: "1px solid rgba(11,74,36,0.1)",
           borderRadius: "var(--kt-radius-xl)",
           padding: 32,
+          display: "flex",
+          gap: 32,
+          alignItems: "flex-start",
         }}
       >
         {/* Left content */}
@@ -102,8 +104,9 @@ export default function Creators() {
 
         {/* Right — featured creators */}
         <div
-          className="creators-sidebar"
           style={{
+            width: 280,
+            flexShrink: 0,
             background: "#fff",
             border: "1px solid var(--kt-border)",
             borderRadius: "var(--kt-radius-lg)",
@@ -111,12 +114,9 @@ export default function Creators() {
             boxShadow: "var(--kt-shadow-soft)",
           }}
         >
-          <h4 style={{ fontSize: 14, fontWeight: 600, color: "var(--kt-dark)", marginBottom: 4 }}>
-            Journeys built from
+          <h4 style={{ fontSize: 14, fontWeight: 600, color: "var(--kt-dark)", marginBottom: 12 }}>
+            Featured creators and thought-leaders
           </h4>
-          <p style={{ fontSize: 12, color: "var(--kt-muted)", lineHeight: 1.5, marginBottom: 12 }}>
-            Content from these creators and thinkers:
-          </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {featured.map((c) => (
               <div

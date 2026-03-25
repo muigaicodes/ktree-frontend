@@ -31,7 +31,7 @@ export default function HowItWorks() {
         </p>
       </div>
 
-      <div className="howitworks-grid">
+      <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 40, alignItems: "center" }}>
         {/* Steps */}
         <div style={{ display: "flex", flexDirection: "column" }}>
           {steps.map((step, i) => (
@@ -74,13 +74,13 @@ export default function HowItWorks() {
           ))}
         </div>
 
-        {/* Phone mockup */}
+        {/* Phone mockup — real screenshot */}
         <div style={{ display: "flex", justifyContent: "center" }}>
           <img
             src="/phone_mockup.png"
             alt="WhatsApp learning journey preview"
             style={{
-              maxWidth: 260,
+              maxWidth: 300,
               width: "100%",
               borderRadius: 24,
               boxShadow: "0 20px 50px rgba(0,0,0,0.15)",
