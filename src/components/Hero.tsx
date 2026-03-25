@@ -14,6 +14,8 @@ export default function Hero() {
   const [phone, setPhone] = useState("");
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [country, setCountry] = useState("");
+  const [deliveryTime, setDeliveryTime] = useState("Morning");
   const [signupDone, setSignupDone] = useState(false);
 
   const handleExtract = async () => {
@@ -28,6 +30,8 @@ export default function Hero() {
     setPhone("");
     setUserName("");
     setUserEmail("");
+    setCountry("");
+    setDeliveryTime("Morning");
 
     const res = await extractInsights({ youtubeUrl: url.trim() });
     setLoading(false);
@@ -54,6 +58,8 @@ export default function Hero() {
           name: userName.trim(),
           phone: phone.trim(),
           email: userEmail.trim(),
+          country: country.trim() || "Kenya",
+          deliveryTime,
           videoUrl: url,
           overview: result.overview || {},
           spines: result.spines || [],
@@ -71,14 +77,7 @@ export default function Hero() {
     const speaker = result.overview?.speaker || "";
     const name = userName.trim() || "there";
 
-    const message = encodeURIComponent(
-      `Hi Knowledge Tree! I'm ${name} and I'd like to start learning.\n\n` +
-      (speaker ? `Speaker: ${speaker}\n` : "") +
-      `Journeys: ${journeyNames}\n` +
-      `Video: ${url}\n` +
-      (userEmail.trim() ? `Email: ${userEmail.trim()}\n` : "") +
-      `\nSend me my first insight!`
-    );
+    const message = encodeURIComponent(`more`);
 
     setTimeout(() => {
       window.location.href = `https://wa.me/250791276393?text=${message}`;
@@ -252,11 +251,34 @@ export default function Hero() {
               </div>
             ) : (
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--kt-dark)", marginBottom: 14 }}>Where should we send your insights?</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--kt-dark)", marginBottom: 14 }}>Start your WhatsApp learning journey</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 340, margin: "0 auto" }}>
                   <input type="text" placeholder="Your name" value={userName} onChange={(e) => setUserName(e.target.value)} style={{ border: "1.5px solid var(--kt-border)", borderRadius: 999, padding: "11px 16px", fontSize: 14, fontFamily: "inherit", outline: "none" }} />
                   <input type="tel" placeholder="WhatsApp number (e.g. +254 7XX)" value={phone} onChange={(e) => setPhone(e.target.value)} style={{ border: "1.5px solid var(--kt-border)", borderRadius: 999, padding: "11px 16px", fontSize: 14, fontFamily: "inherit", outline: "none" }} />
-                  <input type="email" placeholder="Email address" value={userEmail} onChange={(e) => setUserEmail(e.target.value)} style={{ border: "1.5px solid var(--kt-border)", borderRadius: 999, padding: "11px 16px", fontSize: 14, fontFamily: "inherit", outline: "none" }} />
+                  <select value={country} onChange={(e) => setCountry(e.target.value)} style={{ border: "1.5px solid var(--kt-border)", borderRadius: 999, padding: "11px 16px", fontSize: 14, fontFamily: "inherit", outline: "none", color: country ? "var(--kt-dark)" : "var(--kt-muted)", background: "#fff", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239aa5ae' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center" }}>
+                    <option value="" disabled>Country</option>
+                    <option value="Kenya">Kenya</option>
+                    <option value="Rwanda">Rwanda</option>
+                    <option value="Nigeria">Nigeria</option>
+                    <option value="South Africa">South Africa</option>
+                    <option value="Uganda">Uganda</option>
+                    <option value="Tanzania">Tanzania</option>
+                    <option value="Ghana">Ghana</option>
+                    <option value="Ethiopia">Ethiopia</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {[
+                      { id: "Morning", label: "Morning", sub: "7–9am" },
+                      { id: "Midday", label: "Midday", sub: "12–2pm" },
+                      { id: "Evening", label: "Evening", sub: "7–9pm" },
+                    ].map((t) => (
+                      <button key={t.id} onClick={() => setDeliveryTime(t.id)} style={{ flex: 1, border: deliveryTime === t.id ? "1.5px solid var(--kt-green)" : "1.5px solid var(--kt-border)", borderRadius: 12, padding: "10px 4px", fontSize: 12, fontWeight: deliveryTime === t.id ? 600 : 400, color: deliveryTime === t.id ? "var(--kt-green)" : "var(--kt-muted)", background: deliveryTime === t.id ? "rgba(11,74,36,0.04)" : "#fff", cursor: "pointer", fontFamily: "inherit", textAlign: "center", lineHeight: 1.3, transition: "all 0.15s" }}>
+                        {t.label}<br /><span style={{ fontSize: 10, opacity: 0.7 }}>{t.sub}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <input type="email" placeholder="Email (optional)" value={userEmail} onChange={(e) => setUserEmail(e.target.value)} style={{ border: "1.5px solid var(--kt-border)", borderRadius: 999, padding: "11px 16px", fontSize: 14, fontFamily: "inherit", outline: "none" }} />
                   <button onClick={handleWhatsAppSignup} disabled={!phone.trim()} style={{ background: phone.trim() ? "var(--kt-green)" : "var(--kt-border)", color: phone.trim() ? "#fff" : "var(--kt-muted)", border: "none", borderRadius: 999, padding: "12px 20px", fontSize: 14, fontWeight: 600, cursor: phone.trim() ? "pointer" : "default", fontFamily: "inherit", marginTop: 4, boxShadow: phone.trim() ? "0 6px 20px rgba(11,74,36,0.25)" : "none" }}>
                     Send me insights →
                   </button>
