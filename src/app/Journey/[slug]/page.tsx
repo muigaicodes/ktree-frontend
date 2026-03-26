@@ -98,7 +98,7 @@ export default function JourneyReader() {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "radial-gradient(circle at top left, rgba(11,74,36,0.04), transparent 55%)" }}>
         <div style={{ textAlign: "center", maxWidth: 400 }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🌳</div>
+          <img src="/logo-symbol.png" alt="Knowledge Tree" style={{ height: 48, margin: "0 auto 16px" }} />
           <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 8 }}>Journey not found</h1>
           <p style={{ fontSize: 14, color: "var(--kt-muted)", marginBottom: 24 }}>This learning journey doesn&apos;t exist or may have been removed.</p>
           <Link href="/" style={{ background: "var(--kt-green)", color: "#fff", padding: "10px 24px", borderRadius: 999, fontSize: 14, fontWeight: 600, textDecoration: "none" }}>
@@ -137,11 +137,30 @@ export default function JourneyReader() {
       {/* Top bar */}
       <nav style={{ display: "flex", alignItems: "center", padding: "14px 24px", borderBottom: "1px solid var(--kt-border)", background: "rgba(255,255,255,0.9)", backdropFilter: "blur(12px)", position: "sticky", top: 0, zIndex: 10 }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
-          <span style={{ fontSize: 20 }}>🌳</span>
+          <img src="/logo-symbol.png" alt="Knowledge Tree" style={{ height: 32 }} />
           <span style={{ fontWeight: 700, fontSize: 15, color: "var(--kt-dark)" }}>Knowledge Tree</span>
         </Link>
-        <div style={{ marginLeft: "auto", fontSize: 12, color: "var(--kt-muted)" }}>
-          {isOrientation ? "Overview" : `Day ${currentDay} of ${totalInsights}`}
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 14 }}>
+          <span style={{ fontSize: 12, color: "var(--kt-muted)" }}>
+            {isOrientation ? "Overview" : `Day ${currentDay} of ${totalInsights}`}
+          </span>
+          <a
+            href={`${API_BASE}/journey/${slug}/pdf`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "flex", alignItems: "center", gap: 5,
+              padding: "6px 14px", borderRadius: 8,
+              border: "1.5px solid var(--kt-border)", background: "#fff",
+              fontSize: 12, fontWeight: 600, color: "var(--kt-dark)",
+              textDecoration: "none", cursor: "pointer", transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--kt-green)"; e.currentTarget.style.color = "var(--kt-green)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--kt-border)"; e.currentTarget.style.color = "var(--kt-dark)"; }}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8m0 0l-3-3m3 3l3-3M2 11h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            PDF
+          </a>
         </div>
       </nav>
 
