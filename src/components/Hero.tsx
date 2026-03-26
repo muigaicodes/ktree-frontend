@@ -15,8 +15,44 @@ export default function Hero() {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [country, setCountry] = useState("");
+  const [countryCode, setCountryCode] = useState("+254");
+  const [phoneLocal, setPhoneLocal] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("Morning");
   const [signupDone, setSignupDone] = useState(false);
+
+  const COUNTRIES = [
+    { name: "Kenya", code: "+254", flag: "\u{1F1F0}\u{1F1EA}" },
+    { name: "Rwanda", code: "+250", flag: "\u{1F1F7}\u{1F1FC}" },
+    { name: "Nigeria", code: "+234", flag: "\u{1F1F3}\u{1F1EC}" },
+    { name: "South Africa", code: "+27", flag: "\u{1F1FF}\u{1F1E6}" },
+    { name: "Uganda", code: "+256", flag: "\u{1F1FA}\u{1F1EC}" },
+    { name: "Tanzania", code: "+255", flag: "\u{1F1F9}\u{1F1FF}" },
+    { name: "Ghana", code: "+233", flag: "\u{1F1EC}\u{1F1ED}" },
+    { name: "Ethiopia", code: "+251", flag: "\u{1F1EA}\u{1F1F9}" },
+    { name: "Egypt", code: "+20", flag: "\u{1F1EA}\u{1F1EC}" },
+    { name: "DR Congo", code: "+243", flag: "\u{1F1E8}\u{1F1E9}" },
+    { name: "Cameroon", code: "+237", flag: "\u{1F1E8}\u{1F1F2}" },
+    { name: "Senegal", code: "+221", flag: "\u{1F1F8}\u{1F1F3}" },
+    { name: "Zimbabwe", code: "+263", flag: "\u{1F1FF}\u{1F1FC}" },
+    { name: "Botswana", code: "+267", flag: "\u{1F1E7}\u{1F1FC}" },
+    { name: "Zambia", code: "+260", flag: "\u{1F1FF}\u{1F1F2}" },
+    { name: "Mozambique", code: "+258", flag: "\u{1F1F2}\u{1F1FF}" },
+    { name: "Morocco", code: "+212", flag: "\u{1F1F2}\u{1F1E6}" },
+    { name: "India", code: "+91", flag: "\u{1F1EE}\u{1F1F3}" },
+    { name: "United Kingdom", code: "+44", flag: "\u{1F1EC}\u{1F1E7}" },
+    { name: "United States", code: "+1", flag: "\u{1F1FA}\u{1F1F8}" },
+    { name: "Canada", code: "+1", flag: "\u{1F1E8}\u{1F1E6}" },
+    { name: "UAE", code: "+971", flag: "\u{1F1E6}\u{1F1EA}" },
+    { name: "Other", code: "+", flag: "\u{1F30D}" },
+  ];
+
+  const handleCountryChange = (val: string) => {
+    const c = COUNTRIES.find((x) => x.name === val);
+    if (c) {
+      setCountry(c.name);
+      setCountryCode(c.code);
+    }
+  };
 
   const handleExtract = async () => {
     if (!url.trim()) return;
@@ -28,6 +64,8 @@ export default function Hero() {
     setShowSignup(false);
     setSignupDone(false);
     setPhone("");
+    setPhoneLocal("");
+    setCountryCode("+254");
     setUserName("");
     setUserEmail("");
     setCountry("");
@@ -47,7 +85,8 @@ export default function Hero() {
   };
 
   const handleWhatsAppSignup = async () => {
-    if (!phone.trim() || !result) return;
+    const fullPhone = countryCode + phoneLocal.replace(/^0+/, "").replace(/\s/g, "");
+    if (!phoneLocal.trim() || !result) return;
 
     try {
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ktree-api.onrender.com";
@@ -56,9 +95,9 @@ export default function Hero() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: userName.trim(),
-          phone: phone.trim(),
+          phone: fullPhone,
           email: userEmail.trim(),
-          country: country.trim() || "Kenya",
+          country: country || "Kenya",
           deliveryTime,
           videoUrl: url,
           overview: result.overview || {},
@@ -85,7 +124,7 @@ export default function Hero() {
   };
 
   return (
-    <section id="home" style={{ textAlign: "center", padding: "56px 28px 40px", maxWidth: 620, margin: "0 auto" }}>
+    <section id="home" style={{ textAlign: "center", padding: "56px 28px 40px", maxWidth: 680, margin: "0 auto" }}>
       {/* Badge */}
       <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(11,74,36,0.06)", color: "var(--kt-green)", fontSize: 12, fontWeight: 600, padding: "6px 16px", borderRadius: 999, border: "1px solid rgba(11,74,36,0.12)", marginBottom: 20 }}>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.2 2.8L10 5l-2.4 2 .4 2.8L6 8.4 3.8 9.8l.6-2.8L2 5l2.8-1.2z" stroke="#0B4A24" strokeWidth="1" strokeLinejoin="round" fill="none" /></svg>
@@ -232,7 +271,7 @@ export default function Hero() {
           })}
 
           {/* Signup CTA */}
-          <div style={{ marginTop: 24, border: "2px solid var(--kt-green)", borderRadius: 16, padding: "24px 22px", textAlign: "center", background: "#fff" }}>
+          <div style={{ marginTop: 24, border: "1.5px solid var(--kt-green)", borderRadius: 16, padding: "28px 26px", textAlign: "center", background: "rgba(11,74,36,0.015)", maxWidth: 540, marginLeft: "auto", marginRight: "auto" }}>
             {signupDone ? (
               <div>
                 <div style={{ fontSize: 20, marginBottom: 6, color: "var(--kt-green)" }}>✓</div>
@@ -251,39 +290,74 @@ export default function Hero() {
               </div>
             ) : (
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--kt-dark)", marginBottom: 14 }}>Start your WhatsApp learning journey</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 340, margin: "0 auto" }}>
-                  <input type="text" placeholder="Your name" value={userName} onChange={(e) => setUserName(e.target.value)} style={{ border: "1.5px solid var(--kt-border)", borderRadius: 999, padding: "11px 16px", fontSize: 14, fontFamily: "inherit", outline: "none" }} />
-                  <input type="tel" placeholder="WhatsApp number (e.g. +254 7XX)" value={phone} onChange={(e) => setPhone(e.target.value)} style={{ border: "1.5px solid var(--kt-border)", borderRadius: 999, padding: "11px 16px", fontSize: 14, fontFamily: "inherit", outline: "none" }} />
-                  <select value={country} onChange={(e) => setCountry(e.target.value)} style={{ border: "1.5px solid var(--kt-border)", borderRadius: 999, padding: "11px 16px", fontSize: 14, fontFamily: "inherit", outline: "none", color: country ? "var(--kt-dark)" : "var(--kt-muted)", background: "#fff", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239aa5ae' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center" }}>
-                    <option value="" disabled>Country</option>
-                    <option value="Kenya">Kenya</option>
-                    <option value="Rwanda">Rwanda</option>
-                    <option value="Nigeria">Nigeria</option>
-                    <option value="South Africa">South Africa</option>
-                    <option value="Uganda">Uganda</option>
-                    <option value="Tanzania">Tanzania</option>
-                    <option value="Ghana">Ghana</option>
-                    <option value="Ethiopia">Ethiopia</option>
-                    <option value="Other">Other</option>
-                  </select>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    {[
-                      { id: "Morning", label: "Morning", sub: "7–9am" },
-                      { id: "Midday", label: "Midday", sub: "12–2pm" },
-                      { id: "Evening", label: "Evening", sub: "7–9pm" },
-                    ].map((t) => (
-                      <button key={t.id} onClick={() => setDeliveryTime(t.id)} style={{ flex: 1, border: deliveryTime === t.id ? "1.5px solid var(--kt-green)" : "1.5px solid var(--kt-border)", borderRadius: 12, padding: "10px 4px", fontSize: 12, fontWeight: deliveryTime === t.id ? 600 : 400, color: deliveryTime === t.id ? "var(--kt-green)" : "var(--kt-muted)", background: deliveryTime === t.id ? "rgba(11,74,36,0.04)" : "#fff", cursor: "pointer", fontFamily: "inherit", textAlign: "center", lineHeight: 1.3, transition: "all 0.15s" }}>
-                        {t.label}<br /><span style={{ fontSize: 10, opacity: 0.7 }}>{t.sub}</span>
-                      </button>
-                    ))}
+                <div style={{ fontSize: 16, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 4 }}>Start your WhatsApp learning journey</div>
+                <div style={{ fontSize: 12, color: "var(--kt-muted)", marginBottom: 18 }}>We&apos;ll deliver insights daily at your preferred time.</div>
+                <div style={{ maxWidth: 440, margin: "0 auto", textAlign: "left" }}>
+                  {/* Row 1: Name + WhatsApp */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 600, color: "var(--kt-dark)", display: "block", marginBottom: 4 }}>Full name</label>
+                      <input type="text" placeholder="e.g. Solomon Muigai" value={userName} onChange={(e) => setUserName(e.target.value)} style={{ width: "100%", border: "1.5px solid var(--kt-border)", borderRadius: 10, padding: "11px 14px", fontSize: 14, fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 600, color: "var(--kt-dark)", display: "block", marginBottom: 4 }}>WhatsApp number</label>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <select value={countryCode} onChange={(e) => {
+                          setCountryCode(e.target.value);
+                          const c = COUNTRIES.find((x) => x.code === e.target.value);
+                          if (c && c.name !== "Other") setCountry(c.name);
+                        }} style={{ width: 100, border: "1.5px solid var(--kt-border)", borderRadius: 10, padding: "11px 8px", fontSize: 14, fontFamily: "inherit", outline: "none", background: "#fff", cursor: "pointer" }}>
+                          {COUNTRIES.map((c) => (
+                            <option key={c.name} value={c.code}>{c.flag} {c.code}</option>
+                          ))}
+                        </select>
+                        <input type="tel" placeholder="7XX XXX XXX" value={phoneLocal} onChange={(e) => setPhoneLocal(e.target.value)} style={{ flex: 1, border: "1.5px solid var(--kt-border)", borderRadius: 10, padding: "11px 14px", fontSize: 14, fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
+                      </div>
+                    </div>
                   </div>
-                  <input type="email" placeholder="Email (optional)" value={userEmail} onChange={(e) => setUserEmail(e.target.value)} style={{ border: "1.5px solid var(--kt-border)", borderRadius: 999, padding: "11px 16px", fontSize: 14, fontFamily: "inherit", outline: "none" }} />
-                  <button onClick={handleWhatsAppSignup} disabled={!phone.trim()} style={{ background: phone.trim() ? "var(--kt-green)" : "var(--kt-border)", color: phone.trim() ? "#fff" : "var(--kt-muted)", border: "none", borderRadius: 999, padding: "12px 20px", fontSize: 14, fontWeight: 600, cursor: phone.trim() ? "pointer" : "default", fontFamily: "inherit", marginTop: 4, boxShadow: phone.trim() ? "0 6px 20px rgba(11,74,36,0.25)" : "none" }}>
+
+                  {/* Row 2: Email + Country */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 600, color: "var(--kt-dark)", display: "block", marginBottom: 4 }}>Email</label>
+                      <input type="email" placeholder="you@example.com" value={userEmail} onChange={(e) => setUserEmail(e.target.value)} style={{ width: "100%", border: "1.5px solid var(--kt-border)", borderRadius: 10, padding: "11px 14px", fontSize: 14, fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 600, color: "var(--kt-dark)", display: "block", marginBottom: 4 }}>Country</label>
+                      <select value={country} onChange={(e) => handleCountryChange(e.target.value)} style={{ width: "100%", border: "1.5px solid var(--kt-border)", borderRadius: 10, padding: "11px 14px", fontSize: 14, fontFamily: "inherit", outline: "none", color: country ? "var(--kt-dark)" : "var(--kt-muted)", background: "#fff", cursor: "pointer", boxSizing: "border-box" }}>
+                        <option value="" disabled>Select your country</option>
+                        {COUNTRIES.map((c) => (
+                          <option key={c.name} value={c.name}>{c.flag} {c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Delivery time chips */}
+                  <div style={{ marginBottom: 16 }}>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: "var(--kt-dark)", display: "block", marginBottom: 6 }}>Preferred delivery times (choose up to 2)</label>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      {[
+                        { id: "Morning", emoji: "\u{1F305}", label: "Morning", sub: "7\u20139am" },
+                        { id: "Midday", emoji: "\u{1F31E}", label: "Midday", sub: "12\u20132pm" },
+                        { id: "Evening", emoji: "\u{1F319}", label: "Evening", sub: "7\u20139pm" },
+                      ].map((t) => {
+                        const isActive = deliveryTime.includes(t.id);
+                        return (
+                          <button key={t.id} onClick={() => setDeliveryTime(t.id)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, border: isActive ? "1.5px solid var(--kt-green)" : "1.5px solid var(--kt-border)", borderRadius: 10, padding: "10px 8px", fontSize: 13, fontWeight: isActive ? 600 : 400, color: isActive ? "var(--kt-green)" : "var(--kt-muted)", background: isActive ? "rgba(11,74,36,0.04)" : "#fff", cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s" }}>
+                            <span>{t.emoji}</span> {t.label} ({t.sub})
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Submit */}
+                  <button onClick={handleWhatsAppSignup} disabled={!phoneLocal.trim()} style={{ width: "100%", background: phoneLocal.trim() ? "var(--kt-green)" : "var(--kt-border)", color: phoneLocal.trim() ? "#fff" : "var(--kt-muted)", border: "none", borderRadius: 10, padding: "14px 20px", fontSize: 15, fontWeight: 600, cursor: phoneLocal.trim() ? "pointer" : "default", fontFamily: "inherit", boxShadow: phoneLocal.trim() ? "0 6px 20px rgba(11,74,36,0.25)" : "none", transition: "all 0.15s" }}>
                     Send me insights →
                   </button>
+                  <div style={{ fontSize: 11, color: "var(--kt-muted)", marginTop: 8, textAlign: "center" }}>No spam, ever. Just your learning journey.</div>
                 </div>
-                <div style={{ fontSize: 11, color: "var(--kt-muted)", marginTop: 10 }}>No spam, ever. Just your learning journey.</div>
               </div>
             )}
           </div>
