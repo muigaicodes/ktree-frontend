@@ -71,6 +71,21 @@ export default function Navbar() {
             {item.label}
           </span>
         ))}
+        <a
+          href="/creator/login"
+          style={{
+            padding: "6px 14px",
+            borderRadius: 8,
+            background: "rgba(11,74,36,0.06)",
+            color: "var(--kt-green)",
+            fontWeight: 600,
+            fontSize: 13,
+            cursor: "pointer",
+            textDecoration: "none",
+          }}
+        >
+          Creator Studio
+        </a>
       </div>
 
       {/* Hamburger button */}
