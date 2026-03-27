@@ -2,7 +2,7 @@
  * Creator API — auth + playlist builder
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://31.97.69.239:4000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://success-bikini-rip-limited.trycloudflare.com";
 
 const TOKEN_KEY = "ktree_creator_token";
 
