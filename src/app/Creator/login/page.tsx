@@ -30,7 +30,7 @@ export default function CreatorLoginPage() {
     setLoading(false);
 
     if (result.success) {
-      router.push("/creator/dashboard");
+      router.push("/Creator/dashboard");
     } else {
       setError(result.error || "Something went wrong");
     }

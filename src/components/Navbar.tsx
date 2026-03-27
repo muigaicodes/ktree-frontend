@@ -72,7 +72,7 @@ export default function Navbar() {
           </span>
         ))}
         <a
-          href="/creator/login"
+          href="/Creator/login"
           style={{
             padding: "6px 14px",
             borderRadius: 8,

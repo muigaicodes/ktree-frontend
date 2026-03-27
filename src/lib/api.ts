@@ -2,7 +2,7 @@
  * API helpers — wired to the live ktree backend at Render.
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://success-bikini-rip-limited.trycloudflare.com";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://31.97.69.239:4000";
 const WEBHOOK_NOTIFY = "https://n8n.srv1196471.hstgr.cloud/webhook/43e0fd4c-4b42-4464-a9e0-42ee50d3cdf0";
 const WHATSAPP_LINK = "https://wa.me/250791276393";
 

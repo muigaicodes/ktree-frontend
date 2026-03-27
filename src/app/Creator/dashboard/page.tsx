@@ -31,14 +31,14 @@ export default function CreatorDashboard() {
   useEffect(() => {
     const token = getToken();
     if (!token) {
-      router.push("/creator/login");
+      router.push("/Creator/login");
       return;
     }
     getCreatorProfile().then((res) => {
       if (res.success && res.data) {
         setCreator(res.data.creator);
       } else {
-        router.push("/creator/login");
+        router.push("/Creator/login");
       }
       setAuthChecked(true);
     });
@@ -58,7 +58,7 @@ export default function CreatorDashboard() {
 
   const handleLogout = () => {
     logoutCreator();
-    router.push("/creator/login");
+    router.push("/Creator/login");
   };
 
   const handlePlaylistCreated = (playlist: Playlist) => {
