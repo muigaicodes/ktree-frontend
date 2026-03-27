@@ -2,7 +2,7 @@
  * Creator API — auth + playlist builder
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://assembled-shopzilla-advertisements-librarian.trycloudflare.com";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.ktree.uk";
 
 const TOKEN_KEY = "ktree_creator_token";
 
