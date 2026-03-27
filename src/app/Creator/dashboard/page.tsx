@@ -638,48 +638,132 @@ function VideoStatusRow({ video, index, isActive }: { video: PlaylistVideo; inde
    ═══════════════════════════════════════════════════════════ */
 
 function VideoResultPreview({ video }: { video: PlaylistVideo }) {
-  // pipeline_result is stored on the backend but not in our current type
-  // We show journey_slugs and basic stats from the title
+  const result = video.pipeline_result;
+  const spines = result?.spines || [];
+  const insights = result?.insights || [];
+  const quotes = result?.quotes || [];
+  const overview = result?.overview;
+
   return (
     <div>
-      <div style={{ fontSize: 12, color: "var(--kt-muted)", lineHeight: 1.6 }}>
-        Pipeline completed successfully.
-        {video.journey_slugs && video.journey_slugs.length > 0 && (
-          <span> Generated {video.journey_slugs.length} journey{video.journey_slugs.length > 1 ? "s" : ""}.</span>
-        )}
+      {/* Stats row */}
+      <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
+        {[
+          { label: "Journeys", value: spines.length, color: "#0B4A24", bg: "rgba(11,74,36,0.06)" },
+          { label: "Insights", value: insights.length, color: "#2563eb", bg: "#eff6ff" },
+          { label: "Quotes", value: quotes.length, color: "#b07d10", bg: "#fef3e2" },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            style={{
+              padding: "8px 14px",
+              borderRadius: 10,
+              background: stat.bg,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span style={{ fontSize: 18, fontWeight: 700, color: stat.color }}>{stat.value}</span>
+            <span style={{ fontSize: 11, color: stat.color, fontWeight: 600 }}>{stat.label}</span>
+          </div>
+        ))}
       </div>
 
-      {video.journey_slugs && video.journey_slugs.length > 0 && (
-        <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
-          {video.journey_slugs.map((slug) => (
-            <a
-              key={slug}
-              href={`/Journey/${slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
+      {/* Overview */}
+      {overview?.summary && (
+        <div style={{ fontSize: 13, color: "var(--kt-text)", lineHeight: 1.6, marginBottom: 14 }}>
+          {overview.summary}
+        </div>
+      )}
+
+      {/* Themes */}
+      {overview?.themes && overview.themes.length > 0 && (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+          {overview.themes.map((theme, i) => (
+            <span
+              key={i}
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 5,
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: 600,
-                padding: "6px 12px",
-                borderRadius: 8,
+                padding: "4px 10px",
+                borderRadius: 999,
                 background: "rgba(11,74,36,0.06)",
                 color: "var(--kt-green)",
-                textDecoration: "none",
-                transition: "background 0.15s",
               }}
             >
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path d="M8 2L2 8M2 2h6v6" stroke="#0B4A24" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Journey #{slug}
-            </a>
+              {theme}
+            </span>
           ))}
         </div>
       )}
 
+      {/* Journey spines */}
+      {spines.length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 8 }}>
+            Learning journeys found:
+          </div>
+          {spines.map((spine, i) => (
+            <div
+              key={spine.id}
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 10,
+                padding: "8px 0",
+                borderTop: i > 0 ? "1px dashed var(--kt-border)" : "none",
+              }}
+            >
+              <div
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: 6,
+                  background: "rgba(11,74,36,0.06)",
+                  color: "var(--kt-green)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  flexShrink: 0,
+                }}
+              >
+                {i + 1}
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--kt-dark)" }}>{spine.title}</div>
+                <div style={{ fontSize: 11, color: "var(--kt-muted)", marginTop: 2 }}>
+                  {spine.insightIds?.length || 0} insights · {spine.summary?.slice(0, 100)}{(spine.summary?.length || 0) > 100 ? "..." : ""}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Top quote */}
+      {quotes.length > 0 && (
+        <div
+          style={{
+            background: "#fffbeb",
+            border: "1px solid #fef3c7",
+            borderRadius: 10,
+            padding: "10px 14px",
+            fontSize: 12,
+            color: "#92400e",
+            lineHeight: 1.5,
+            fontStyle: "italic",
+            marginBottom: 10,
+          }}
+        >
+          &ldquo;{quotes[0].text}&rdquo;
+          {quotes[0].speaker && <span style={{ fontStyle: "normal", fontWeight: 600 }}> — {quotes[0].speaker}</span>}
+        </div>
+      )}
+
+      {/* Processing time */}
       {video.processing_completed_at && video.processing_started_at && (
         <div style={{ fontSize: 11, color: "var(--kt-muted)", marginTop: 8 }}>
           Processed in {Math.round((new Date(video.processing_completed_at).getTime() - new Date(video.processing_started_at).getTime()) / 1000)}s

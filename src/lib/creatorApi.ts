@@ -2,7 +2,7 @@
  * Creator API — auth + playlist builder
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.ktree.uk";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://31.97.69.239:4000";
 
 const TOKEN_KEY = "ktree_creator_token";
 
@@ -58,6 +58,12 @@ export interface PlaylistVideo {
   status: "pending" | "processing" | "completed" | "failed";
   error_message: string | null;
   journey_slugs: string[];
+  pipeline_result: {
+    overview?: { hook?: string; summary?: string; speaker?: string; themes?: string[]; estimatedDays?: number };
+    spines?: Array<{ id: string; title: string; summary: string; insightIds?: string[] }>;
+    insights?: Array<{ id: string; title: string; insight: string; evidence: string[] }>;
+    quotes?: Array<{ text: string; speaker?: string; theme: string }>;
+  } | null;
   processing_started_at: string | null;
   processing_completed_at: string | null;
   created_at: string;
