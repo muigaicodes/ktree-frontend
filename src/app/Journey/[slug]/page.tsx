@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ktree-api.onrender.com";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.ktree.uk";
 
 interface Message {
   id: string;
