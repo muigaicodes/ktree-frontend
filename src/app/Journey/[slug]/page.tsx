@@ -578,3 +578,4 @@ function SubscribeForm({ slug, journeyTitle, totalInsights }: { slug: string; jo
       )}
     </div>
   );
+}
