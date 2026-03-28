@@ -9,6 +9,7 @@ import {
   createPlaylist,
   listPlaylists,
   getPlaylist,
+  publishVideo,
   type Creator,
   type Playlist,
   type PlaylistDetail,
@@ -511,7 +512,7 @@ function PlaylistDetailView({
       {/* Video list */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {detail.videos.map((video, idx) => (
-          <VideoStatusRow key={video.id} video={video} index={idx} isActive={idx === processingIndex} />
+          <VideoStatusRow key={video.id} video={video} index={idx} isActive={idx === processingIndex} playlistId={detail.playlist.id} onRefresh={onRefresh} />
         ))}
       </div>
     </div>
@@ -522,7 +523,7 @@ function PlaylistDetailView({
    Video Status Row
    ═══════════════════════════════════════════════════════════ */
 
-function VideoStatusRow({ video, index, isActive }: { video: PlaylistVideo; index: number; isActive: boolean }) {
+function VideoStatusRow({ video, index, isActive, playlistId, onRefresh }: { video: PlaylistVideo; index: number; isActive: boolean; playlistId: string; onRefresh: () => void }) {
   const [expanded, setExpanded] = useState(false);
 
   const statusIcon = () => {
@@ -626,7 +627,7 @@ function VideoStatusRow({ video, index, isActive }: { video: PlaylistVideo; inde
       {/* Expanded result preview */}
       {expanded && video.status === "completed" && (
         <div style={{ borderTop: "1px solid var(--kt-border)", padding: "16px 16px 16px 60px" }}>
-          <VideoResultPreview video={video} />
+          <VideoResultPreview video={video} playlistId={playlistId} onPublished={onRefresh} />
         </div>
       )}
     </div>
@@ -637,12 +638,33 @@ function VideoStatusRow({ video, index, isActive }: { video: PlaylistVideo; inde
    Video Result Preview (when expanded)
    ═══════════════════════════════════════════════════════════ */
 
-function VideoResultPreview({ video }: { video: PlaylistVideo }) {
+function VideoResultPreview({ video, playlistId, onPublished }: { video: PlaylistVideo; playlistId: string; onPublished: () => void }) {
+  const [publishing, setPublishing] = useState(false);
+  const [publishResult, setPublishResult] = useState<{ slugs: string[]; message: string } | null>(null);
+  const [publishError, setPublishError] = useState<string | null>(null);
+
   const result = video.pipeline_result;
   const spines = result?.spines || [];
   const insights = result?.insights || [];
   const quotes = result?.quotes || [];
   const overview = result?.overview;
+  const alreadyPublished = video.journey_slugs && video.journey_slugs.length > 0;
+
+  const handlePublish = async () => {
+    setPublishing(true);
+    setPublishError(null);
+    const res = await publishVideo(playlistId, video.id);
+    setPublishing(false);
+
+    if (res.success && res.data) {
+      setPublishResult({ slugs: res.data.journeySlugs, message: res.data.message });
+      onPublished();
+    } else {
+      setPublishError(res.error || "Failed to publish");
+    }
+  };
+
+  const journeySlugs = publishResult?.slugs || video.journey_slugs || [];
 
   return (
     <div>
@@ -755,7 +777,7 @@ function VideoResultPreview({ video }: { video: PlaylistVideo }) {
             color: "#92400e",
             lineHeight: 1.5,
             fontStyle: "italic",
-            marginBottom: 10,
+            marginBottom: 14,
           }}
         >
           &ldquo;{quotes[0].text}&rdquo;
@@ -763,9 +785,107 @@ function VideoResultPreview({ video }: { video: PlaylistVideo }) {
         </div>
       )}
 
+      {/* Publish button or published status */}
+      {alreadyPublished || publishResult ? (
+        <div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "12px 16px",
+              background: "#f0fdf4",
+              border: "1px solid #bbf7d0",
+              borderRadius: 12,
+              marginBottom: 10,
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M3 8l3.5 3.5L13 5" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#16a34a" }}>
+              Published to WhatsApp
+            </span>
+            <span style={{ fontSize: 12, color: "var(--kt-muted)", marginLeft: 4 }}>
+              — {journeySlugs.length} journey{journeySlugs.length !== 1 ? "s" : ""} ready for delivery
+            </span>
+          </div>
+
+          {/* Journey links */}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {journeySlugs.map((slug) => (
+              <a
+                key={slug}
+                href={`/Journey/${slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  padding: "6px 12px",
+                  borderRadius: 8,
+                  background: "rgba(11,74,36,0.06)",
+                  color: "var(--kt-green)",
+                  textDecoration: "none",
+                }}
+              >
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M8 2L2 8M2 2h6v6" stroke="#0B4A24" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                View Journey #{slug}
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div>
+          {publishError && (
+            <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#b91c1c", marginBottom: 10 }}>
+              {publishError}
+            </div>
+          )}
+          <button
+            onClick={handlePublish}
+            disabled={publishing}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "12px 24px",
+              fontSize: 14,
+              fontWeight: 600,
+              fontFamily: "inherit",
+              border: "none",
+              borderRadius: 12,
+              cursor: publishing ? "wait" : "pointer",
+              background: publishing ? "var(--kt-border)" : "var(--kt-green)",
+              color: publishing ? "var(--kt-muted)" : "#fff",
+              boxShadow: publishing ? "none" : "0 6px 20px rgba(11,74,36,0.25)",
+              transition: "all 0.2s",
+            }}
+          >
+            {publishing ? (
+              <>
+                <Spinner size={14} color="#fff" /> Publishing...
+              </>
+            ) : (
+              <>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M14 2L7.5 14l-2-5.5L0 6.5z" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round" />
+                </svg>
+                Publish to WhatsApp
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
       {/* Processing time */}
       {video.processing_completed_at && video.processing_started_at && (
-        <div style={{ fontSize: 11, color: "var(--kt-muted)", marginTop: 8 }}>
+        <div style={{ fontSize: 11, color: "var(--kt-muted)", marginTop: 10 }}>
           Processed in {Math.round((new Date(video.processing_completed_at).getTime() - new Date(video.processing_started_at).getTime()) / 1000)}s
         </div>
       )}

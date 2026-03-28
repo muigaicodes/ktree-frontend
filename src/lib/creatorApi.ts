@@ -181,3 +181,19 @@ export async function getPlaylist(id: string): Promise<{ success: boolean; data?
     return { success: false, error: "Network error" };
   }
 }
+
+export async function publishVideo(
+  playlistId: string,
+  videoId: string
+): Promise<{ success: boolean; data?: { journeySlugs: string[]; message: string }; error?: string }> {
+  try {
+    const res = await creatorFetch(`/creator/playlists/${playlistId}/videos/${videoId}/publish`, {
+      method: "POST",
+    });
+    const data = await res.json();
+    if (!res.ok) return { success: false, error: data.error || "Failed to publish" };
+    return { success: true, data };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
