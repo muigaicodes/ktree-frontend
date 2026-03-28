@@ -804,10 +804,10 @@ function VideoResultPreview({ video, playlistId, onPublished }: { video: Playlis
               <path d="M3 8l3.5 3.5L13 5" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span style={{ fontSize: 13, fontWeight: 600, color: "#16a34a" }}>
-              Published to WhatsApp
+              Published
             </span>
             <span style={{ fontSize: 12, color: "var(--kt-muted)", marginLeft: 4 }}>
-              — {journeySlugs.length} journey{journeySlugs.length !== 1 ? "s" : ""} ready for delivery
+              — {journeySlugs.length} journey{journeySlugs.length !== 1 ? "s" : ""} saved and ready for subscribers
             </span>
           </div>
 

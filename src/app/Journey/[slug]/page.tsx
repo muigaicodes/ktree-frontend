@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.ktree.uk";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ktree-api.onrender.com";
 
 interface Message {
   id: string;
@@ -348,7 +348,233 @@ export default function JourneyReader() {
             })}
           </div>
         </details>
+
+        {/* WhatsApp Subscribe Form */}
+        <SubscribeForm slug={slug} journeyTitle={data.journey.title} totalInsights={totalInsights} />
       </div>
     </div>
   );
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Subscribe Form — get this journey on WhatsApp
+   ═══════════════════════════════════════════════════════════ */
+
+const COUNTRIES = [
+  { name: "Kenya", code: "+254", flag: "🇰🇪" },
+  { name: "Rwanda", code: "+250", flag: "🇷🇼" },
+  { name: "Nigeria", code: "+234", flag: "🇳🇬" },
+  { name: "South Africa", code: "+27", flag: "🇿🇦" },
+  { name: "Uganda", code: "+256", flag: "🇺🇬" },
+  { name: "Tanzania", code: "+255", flag: "🇹🇿" },
+  { name: "Ghana", code: "+233", flag: "🇬🇭" },
+  { name: "Ethiopia", code: "+251", flag: "🇪🇹" },
+  { name: "Egypt", code: "+20", flag: "🇪🇬" },
+  { name: "India", code: "+91", flag: "🇮🇳" },
+  { name: "United Kingdom", code: "+44", flag: "🇬🇧" },
+  { name: "United States", code: "+1", flag: "🇺🇸" },
+  { name: "UAE", code: "+971", flag: "🇦🇪" },
+  { name: "Other", code: "+", flag: "🌍" },
+];
+
+function SubscribeForm({ slug, journeyTitle, totalInsights }: { slug: string; journeyTitle: string; totalInsights: number }) {
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState("");
+  const [countryCode, setCountryCode] = useState("+254");
+  const [phoneLocal, setPhoneLocal] = useState("");
+  const [deliveryTime, setDeliveryTime] = useState("Morning");
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [resultMessage, setResultMessage] = useState("");
+
+  const handleSubscribe = async () => {
+    const fullPhone = countryCode + phoneLocal.replace(/^0+/, "").replace(/\s/g, "");
+    if (!phoneLocal.trim()) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`${API_BASE}/journey/${slug}/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim() || "Learner",
+          phone: fullPhone,
+          country: COUNTRIES.find((c) => c.code === countryCode)?.name || "Kenya",
+          deliveryTime,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setDone(true);
+        setResultMessage(data.message || "Subscribed!");
+      } else {
+        setError(data.error || "Something went wrong");
+      }
+    } catch {
+      setError("Network error — please try again");
+    }
+
+    setLoading(false);
+  };
+
+  if (done) {
+    return (
+      <div style={{ marginTop: 32, border: "1.5px solid #16a34a", borderRadius: 16, padding: "28px 24px", textAlign: "center", background: "#f0fdf4" }}>
+        <div style={{ fontSize: 24, marginBottom: 8 }}>✓</div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 4 }}>You&apos;re subscribed!</div>
+        <div style={{ fontSize: 13, color: "var(--kt-muted)", lineHeight: 1.5 }}>{resultMessage}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 32, border: "1.5px solid var(--kt-green)", borderRadius: 16, padding: "28px 24px", background: "rgba(11,74,36,0.015)" }}>
+      {!showForm ? (
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 6 }}>
+            Get this journey on WhatsApp
+          </div>
+          <div style={{ fontSize: 13, color: "var(--kt-muted)", marginBottom: 16, lineHeight: 1.5 }}>
+            {totalInsights} insights delivered daily — one bite-size lesson at a time. Type MORE when you&apos;re ready for the next one.
+          </div>
+          <button
+            onClick={() => setShowForm(true)}
+            style={{
+              background: "var(--kt-green)",
+              color: "#fff",
+              border: "none",
+              borderRadius: 999,
+              padding: "12px 28px",
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              boxShadow: "0 6px 20px rgba(11,74,36,0.25)",
+            }}
+          >
+            Subscribe for free →
+          </button>
+        </div>
+      ) : (
+        <div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 4, textAlign: "center" }}>
+            Get &ldquo;{journeyTitle}&rdquo; on WhatsApp
+          </div>
+          <div style={{ fontSize: 12, color: "var(--kt-muted)", marginBottom: 18, textAlign: "center" }}>
+            We&apos;ll deliver one insight per day. Type MORE for the next one.
+          </div>
+
+          {error && (
+            <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#b91c1c", marginBottom: 14 }}>
+              {error}
+            </div>
+          )}
+
+          <div style={{ maxWidth: 400, margin: "0 auto" }}>
+            {/* Name */}
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: "var(--kt-dark)", display: "block", marginBottom: 4 }}>Your name</label>
+              <input
+                type="text"
+                placeholder="e.g. Solomon"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                style={{ width: "100%", border: "1.5px solid var(--kt-border)", borderRadius: 10, padding: "11px 14px", fontSize: 14, fontFamily: "inherit", outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+
+            {/* Phone */}
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: "var(--kt-dark)", display: "block", marginBottom: 4 }}>WhatsApp number</label>
+              <div style={{ display: "flex", gap: 6 }}>
+                <select
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                  style={{ width: 110, border: "1.5px solid var(--kt-border)", borderRadius: 10, padding: "11px 8px", fontSize: 14, fontFamily: "inherit", outline: "none", background: "#fff", cursor: "pointer" }}
+                >
+                  {COUNTRIES.map((c) => (
+                    <option key={c.name} value={c.code}>{c.flag} {c.code}</option>
+                  ))}
+                </select>
+                <input
+                  type="tel"
+                  placeholder="7XX XXX XXX"
+                  value={phoneLocal}
+                  onChange={(e) => setPhoneLocal(e.target.value)}
+                  style={{ flex: 1, border: "1.5px solid var(--kt-border)", borderRadius: 10, padding: "11px 14px", fontSize: 14, fontFamily: "inherit", outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+            </div>
+
+            {/* Delivery time */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: "var(--kt-dark)", display: "block", marginBottom: 6 }}>Preferred time</label>
+              <div style={{ display: "flex", gap: 8 }}>
+                {[
+                  { id: "Morning", emoji: "🌅", label: "Morning" },
+                  { id: "Midday", emoji: "🌞", label: "Midday" },
+                  { id: "Evening", emoji: "🌙", label: "Evening" },
+                ].map((t) => {
+                  const isActive = deliveryTime === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setDeliveryTime(t.id)}
+                      style={{
+                        flex: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 5,
+                        border: isActive ? "1.5px solid var(--kt-green)" : "1.5px solid var(--kt-border)",
+                        borderRadius: 10,
+                        padding: "10px 8px",
+                        fontSize: 13,
+                        fontWeight: isActive ? 600 : 400,
+                        color: isActive ? "var(--kt-green)" : "var(--kt-muted)",
+                        background: isActive ? "rgba(11,74,36,0.04)" : "#fff",
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      <span>{t.emoji}</span> {t.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Submit */}
+            <button
+              onClick={handleSubscribe}
+              disabled={loading || !phoneLocal.trim()}
+              style={{
+                width: "100%",
+                padding: "14px 20px",
+                fontSize: 15,
+                fontWeight: 600,
+                fontFamily: "inherit",
+                border: "none",
+                borderRadius: 10,
+                cursor: loading || !phoneLocal.trim() ? "default" : "pointer",
+                background: loading || !phoneLocal.trim() ? "var(--kt-border)" : "var(--kt-green)",
+                color: loading || !phoneLocal.trim() ? "var(--kt-muted)" : "#fff",
+                boxShadow: phoneLocal.trim() && !loading ? "0 6px 20px rgba(11,74,36,0.25)" : "none",
+                transition: "all 0.15s",
+              }}
+            >
+              {loading ? "Subscribing..." : "Send me insights →"}
+            </button>
+            <div style={{ fontSize: 11, color: "var(--kt-muted)", marginTop: 8, textAlign: "center" }}>
+              No spam, ever. Just your daily learning insight.
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
