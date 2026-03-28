@@ -811,32 +811,10 @@ function VideoResultPreview({ video, playlistId, onPublished }: { video: Playlis
             </span>
           </div>
 
-          {/* Journey links */}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {/* Journey links with share + preview */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {journeySlugs.map((slug) => (
-              <a
-                key={slug}
-                href={`/Journey/${slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 5,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  padding: "6px 12px",
-                  borderRadius: 8,
-                  background: "rgba(11,74,36,0.06)",
-                  color: "var(--kt-green)",
-                  textDecoration: "none",
-                }}
-              >
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                  <path d="M8 2L2 8M2 2h6v6" stroke="#0B4A24" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                View Journey #{slug}
-              </a>
+              <JourneyCard key={slug} slug={slug} />
             ))}
           </div>
         </div>
@@ -887,6 +865,265 @@ function VideoResultPreview({ video, playlistId, onPublished }: { video: Playlis
       {video.processing_completed_at && video.processing_started_at && (
         <div style={{ fontSize: 11, color: "var(--kt-muted)", marginTop: 10 }}>
           Processed in {Math.round((new Date(video.processing_completed_at).getTime() - new Date(video.processing_started_at).getTime()) / 1000)}s
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Journey Card — shows journey with share buttons + inline preview
+   ═══════════════════════════════════════════════════════════ */
+
+const JOURNEY_API = "https://api.ktree.uk";
+
+interface JourneyMessage {
+  id: string;
+  orderIndex: number;
+  messageNumber: number;
+  content: string;
+  mediaUrl: string | null;
+}
+
+function parseContent(content: string) {
+  const lines = content.split("\n");
+  const parts: Array<{ type: "title" | "quote" | "text" | "cta"; text: string }> = [];
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    if (trimmed.startsWith("*") && trimmed.endsWith("*") && trimmed.length > 2) {
+      parts.push({ type: "title", text: trimmed.slice(1, -1) });
+    } else if (trimmed.startsWith('_"') && trimmed.endsWith('"_')) {
+      parts.push({ type: "quote", text: trimmed.slice(2, -2) });
+    } else if (trimmed.includes("*MORE*") || trimmed.includes("Type *MORE*") || trimmed.startsWith("Commands:")) {
+      // Skip
+    } else {
+      parts.push({ type: "text", text: trimmed });
+    }
+  }
+  return parts;
+}
+
+function JourneyCard({ slug }: { slug: string }) {
+  const [showPreview, setShowPreview] = useState(false);
+  const [messages, setMessages] = useState<JourneyMessage[]>([]);
+  const [journeyTitle, setJourneyTitle] = useState("");
+  const [loadingPreview, setLoadingPreview] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [previewDay, setPreviewDay] = useState(0);
+
+  const journeyUrl = `https://ktree-export.vercel.app/Journey/${slug}`;
+
+  const handlePreview = async () => {
+    if (showPreview) {
+      setShowPreview(false);
+      return;
+    }
+    if (messages.length > 0) {
+      setShowPreview(true);
+      return;
+    }
+    setLoadingPreview(true);
+    try {
+      const res = await fetch(`${JOURNEY_API}/journey/${slug}`);
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(data.messages || []);
+        setJourneyTitle(data.journey?.title || `Journey #${slug}`);
+        setShowPreview(true);
+      }
+    } catch {
+      // silently fail
+    }
+    setLoadingPreview(false);
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(journeyUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareOnWhatsApp = () => {
+    const text = encodeURIComponent(`Check out this learning journey: ${journeyTitle || "Knowledge Tree"}\n${journeyUrl}`);
+    window.open(`https://wa.me/?text=${text}`, "_blank");
+  };
+
+  const shareOnTwitter = () => {
+    const text = encodeURIComponent(`Check out this learning journey on @KnowledgeTree 🌳\n${journeyUrl}`);
+    window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+  };
+
+  const shareOnLinkedIn = () => {
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(journeyUrl)}`, "_blank");
+  };
+
+  const currentMessage = messages[previewDay];
+  const parts = currentMessage ? parseContent(currentMessage.content) : [];
+  const titlePart = parts.find((p) => p.type === "title");
+
+  return (
+    <div style={{ border: "1px solid var(--kt-border)", borderRadius: 12, overflow: "hidden", background: "#fff" }}>
+      {/* Header row */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 14px" }}>
+        <div style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "var(--kt-dark)" }}>
+          Journey #{slug}
+        </div>
+
+        {/* Action buttons */}
+        <div style={{ display: "flex", gap: 4 }}>
+          {/* Preview toggle */}
+          <button
+            onClick={handlePreview}
+            style={{
+              display: "flex", alignItems: "center", gap: 4,
+              padding: "5px 10px", borderRadius: 6, border: "1px solid var(--kt-border)",
+              background: showPreview ? "rgba(11,74,36,0.06)" : "#fff",
+              color: showPreview ? "var(--kt-green)" : "var(--kt-muted)",
+              fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+            }}
+          >
+            {loadingPreview ? <Spinner size={10} /> : (
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M1 6s2-4 5-4 5 4 5 4-2 4-5 4S1 6 1 6z" stroke="currentColor" strokeWidth="1.2" />
+                <circle cx="6" cy="6" r="1.5" stroke="currentColor" strokeWidth="1.2" />
+              </svg>
+            )}
+            {showPreview ? "Hide" : "Preview"}
+          </button>
+
+          {/* Open in new tab */}
+          <a
+            href={`/Journey/${slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "flex", alignItems: "center", gap: 4,
+              padding: "5px 10px", borderRadius: 6, border: "1px solid var(--kt-border)",
+              background: "#fff", color: "var(--kt-muted)",
+              fontSize: 11, fontWeight: 600, textDecoration: "none", fontFamily: "inherit",
+            }}
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M8 2L2 8M2 2h6v6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Open
+          </a>
+
+          {/* Copy link */}
+          <button
+            onClick={handleCopy}
+            style={{
+              display: "flex", alignItems: "center", gap: 4,
+              padding: "5px 10px", borderRadius: 6, border: "1px solid var(--kt-border)",
+              background: copied ? "#f0fdf4" : "#fff",
+              color: copied ? "#16a34a" : "var(--kt-muted)",
+              fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+            }}
+          >
+            {copied ? "Copied!" : (
+              <>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <rect x="3" y="3" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.1" />
+                  <path d="M7 3V2a1 1 0 00-1-1H2a1 1 0 00-1 1v4a1 1 0 001 1h1" stroke="currentColor" strokeWidth="1.1" />
+                </svg>
+                Copy
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Share icons */}
+        <div style={{ display: "flex", gap: 3, marginLeft: 4 }}>
+          <button onClick={shareOnWhatsApp} title="Share on WhatsApp" style={{ width: 26, height: 26, borderRadius: 6, border: "none", background: "#25D366", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+          </button>
+          <button onClick={shareOnTwitter} title="Share on X" style={{ width: 26, height: 26, borderRadius: 6, border: "none", background: "#000", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </button>
+          <button onClick={shareOnLinkedIn} title="Share on LinkedIn" style={{ width: 26, height: 26, borderRadius: 6, border: "none", background: "#0A66C2", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Inline preview */}
+      {showPreview && messages.length > 0 && (
+        <div style={{ borderTop: "1px solid var(--kt-border)", padding: "16px" }}>
+          {/* Journey title */}
+          <div style={{ fontSize: 15, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 4 }}>
+            {journeyTitle}
+          </div>
+          <div style={{ fontSize: 11, color: "var(--kt-muted)", marginBottom: 14 }}>
+            {messages.length - 1} insights · {messages.length - 1} day journey
+          </div>
+
+          {/* Day navigation dots */}
+          <div style={{ display: "flex", gap: 3, marginBottom: 14, flexWrap: "wrap" }}>
+            {messages.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPreviewDay(i)}
+                style={{
+                  width: i === previewDay ? 20 : 8,
+                  height: 8,
+                  borderRadius: 999,
+                  border: "none",
+                  background: i === previewDay ? "var(--kt-green)" : "rgba(11,74,36,0.15)",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  padding: 0,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Message content */}
+          <div style={{ background: "#fafbfa", borderRadius: 10, padding: "14px 16px", border: "1px solid var(--kt-border)" }}>
+            {titlePart && (
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--kt-dark)", marginBottom: 8 }}>
+                {previewDay === 0 ? "Overview" : `Day ${previewDay}`}: {titlePart.text}
+              </div>
+            )}
+            {parts
+              .filter((p) => p.type !== "title")
+              .slice(0, 4)
+              .map((p, i) => {
+                if (p.type === "quote") {
+                  return (
+                    <div key={i} style={{ background: "#fffbeb", border: "1px solid #fef3c7", borderRadius: 8, padding: "8px 12px", margin: "8px 0", fontSize: 12, color: "#92400e", fontStyle: "italic", lineHeight: 1.5 }}>
+                      &ldquo;{p.text}&rdquo;
+                    </div>
+                  );
+                }
+                return (
+                  <p key={i} style={{ fontSize: 12, color: "var(--kt-text)", lineHeight: 1.6, margin: "6px 0" }}>
+                    {p.text.length > 200 ? p.text.slice(0, 200) + "..." : p.text}
+                  </p>
+                );
+              })}
+          </div>
+
+          {/* Nav buttons */}
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10 }}>
+            <button
+              onClick={() => setPreviewDay(Math.max(0, previewDay - 1))}
+              disabled={previewDay === 0}
+              style={{ fontSize: 12, fontWeight: 500, padding: "6px 12px", borderRadius: 6, border: "1px solid var(--kt-border)", background: "#fff", color: previewDay === 0 ? "var(--kt-border)" : "var(--kt-dark)", cursor: previewDay === 0 ? "default" : "pointer", fontFamily: "inherit" }}
+            >
+              ← Prev
+            </button>
+            <span style={{ fontSize: 11, color: "var(--kt-muted)", alignSelf: "center" }}>
+              {previewDay === 0 ? "Overview" : `Day ${previewDay}`} of {messages.length - 1}
+            </span>
+            <button
+              onClick={() => setPreviewDay(Math.min(messages.length - 1, previewDay + 1))}
+              disabled={previewDay === messages.length - 1}
+              style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "none", background: previewDay === messages.length - 1 ? "var(--kt-border)" : "var(--kt-green)", color: previewDay === messages.length - 1 ? "var(--kt-muted)" : "#fff", cursor: previewDay === messages.length - 1 ? "default" : "pointer", fontFamily: "inherit" }}
+            >
+              Next →
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -440,7 +440,7 @@ function SubscribeForm({ slug, journeyTitle, totalInsights }: { slug: string; jo
             Get this journey on WhatsApp
           </div>
           <div style={{ fontSize: 13, color: "var(--kt-muted)", marginBottom: 16, lineHeight: 1.5 }}>
-            {totalInsights} insights delivered daily — one bite-size lesson at a time. Type MORE when you&apos;re ready for the next one.
+            {`${totalInsights} insights delivered daily — one bite-size lesson at a time. Type MORE when you're ready for the next one.`}
           </div>
           <button
             onClick={() => setShowForm(true)}
