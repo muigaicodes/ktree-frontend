@@ -1,5 +1,5 @@
 /**
- * API helpers — wired to the live ktree backend at Render.
+ * API helpers — wired to the live ktree backend on VPS.
  */
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.ktree.uk";
@@ -74,20 +74,61 @@ export interface JourneyMessage {
   formatted: string;
 }
 
-/* ── Pipeline API ── */
+/* ── Pipeline API (async with polling) ── */
 
-/** Run the full pipeline: transcript → insights → quotes → arc spines */
-export async function generateArcs(videoUrl: string): Promise<PipelineResult> {
-  const res = await fetch(`${API_BASE}/generate-arcs`, {
+/** Submit a video URL for async processing. Returns a jobId. */
+async function submitJob(videoUrl: string): Promise<string> {
+  const res = await fetch(`${API_BASE}/generate-insights`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ videoUrl }),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "Pipeline failed" }));
-    throw new Error(err.error || `Pipeline failed (${res.status})`);
+    const err = await res.json().catch(() => ({ error: "Failed to submit job" }));
+    throw new Error(err.error || `Failed to submit job (${res.status})`);
   }
-  return res.json();
+  const data = await res.json();
+  return data.jobId;
+}
+
+/** Poll a job until it completes or fails. Returns the pipeline result. */
+async function pollJob(jobId: string, onProgress?: (progress: number) => void): Promise<PipelineResult> {
+  const maxAttempts = 120; // 10 minutes max (120 * 5s)
+  let attempts = 0;
+
+  while (attempts < maxAttempts) {
+    const res = await fetch(`${API_BASE}/job/${jobId}`);
+    if (!res.ok) {
+      throw new Error(`Failed to check job status (${res.status})`);
+    }
+
+    const data = await res.json();
+
+    if (data.status === "completed" && data.result) {
+      return data.result as PipelineResult;
+    }
+
+    if (data.status === "failed") {
+      throw new Error(data.error || "Pipeline processing failed");
+    }
+
+    // Report progress if available
+    if (onProgress && data.progress) {
+      onProgress(data.progress);
+    }
+
+    // Wait 5 seconds before polling again
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    attempts++;
+  }
+
+  throw new Error("Processing timed out. Please try again.");
+}
+
+/** Run the full pipeline async: submit → poll → return result */
+export async function generateArcs(videoUrl: string): Promise<PipelineResult> {
+  const jobId = await submitJob(videoUrl);
+  return pollJob(jobId);
 }
 
 /** Generate a WhatsApp-ready journey from a selected arc spine */
@@ -145,7 +186,7 @@ export async function submitNotify(payload: NotifyPayload): Promise<boolean> {
 }
 
 /**
- * Extract insights from a YouTube URL (calls the real pipeline).
+ * Extract insights from a YouTube URL (async with polling).
  * This is the main entry point used by the Hero component.
  */
 export async function extractInsights(payload: ExtractPayload): Promise<{
